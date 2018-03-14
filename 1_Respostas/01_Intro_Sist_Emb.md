@@ -6,7 +6,9 @@ Embarcados - 1.2018
     
 3_  
 a) BMS (Battery Management System) para carros elétricos; Computador de bordo; Injeção elétrica.
+
 b) Controle de temperatura no forno; Temporizador do microondas; Controle do ar condicionado.
+
 c) IoT (Internet das Coisas); Controle de Servomotores; Controle da produção.
     
 4_  Microcontroladores (Microprocessador + periféricos);
