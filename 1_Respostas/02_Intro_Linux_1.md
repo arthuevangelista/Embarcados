@@ -14,7 +14,7 @@ Embarcados - 1.2018
 
 7_  
 
-a)  -help ou -h \n\n
+a)  -help ou -h 
 
 b)  ls 
 
