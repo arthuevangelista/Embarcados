@@ -14,23 +14,23 @@ Embarcados - 1.2018
 
 7_  
 
-a)  -help ou -h
-b)  ls
-c)  pwd
-d)  cd
-e)  mkdir
-f)  rm
-g)  rm ou rmdir
-h)  cp
-i)  cp -a
-j)  mv
-k)  mv -a
-l)  mv ./nomeVelho ./nomeNovo
-m)  cat nomeDoArquivo
-n)  file -b nomeDoArquivo
-o)  clear
-p)  grep palavraChave nomeDoArquivo
-q)  sort nomeDoArquivo
-r)  sed -n palavraChave
-s)  diff nomeDoArquivo1 nomeDoArquivo2 ou cmp --silent nomeDoArquivo1 nomeDoArquivo2
-t)  echo "imprima esta string"
+a)  -help ou -h 
+b)  ls 
+c)  pwd 
+d)  cd 
+e)  mkdir 
+f)  rm 
+g)  rm ou rmdir 
+h)  cp 
+i)  cp -a 
+j)  mv 
+k)  mv -a 
+l)  mv ./nomeVelho ./nomeNovo 
+m)  cat nomeDoArquivo 
+n)  file -b nomeDoArquivo 
+o)  clear 
+p)  grep palavraChave nomeDoArquivo 
+q)  sort nomeDoArquivo 
+r)  sed -n palavraChave 
+s)  diff nomeDoArquivo1 nomeDoArquivo2 ou cmp --silent nomeDoArquivo1 nomeDoArquivo2 
+t)  echo "imprima esta string" 
