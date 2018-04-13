@@ -1,8 +1,18 @@
 Embarcados - 1.2018
 
 1_  
+    ls
+    cd Documentos/Embarcados/
+    ls
+    head Ola_mundo.txt
 
 2_  
+    ls
+    cd ..
+    cd ..
+    sudo -s
+    ls root
+    
 
 3_  
 
