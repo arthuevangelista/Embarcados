@@ -16,18 +16,18 @@ Embarcados - 1.2018
 
 a)  -help ou -h   
 b)  ls    
-c)  pwd   
+c)  pwd  % apresenta o caminho da pasta   
 d)  cd    
-e)  mkdir   
-f)  rm    
-g)  rm ou rmdir   
+e)  mkdir   % make directory = cria uma pasta   
+f)  rm    %
+g)  rm ou rmdir   % remove / remove directory   
 h)  cp    
 i)  cp -a   
 j)  mv    
 k)  mv -a   
 l)  mv ./nomeVelho ./nomeNovo   
-m)  cat nomeDoArquivo   
-n)  file -b nomeDoArquivo   
+m)  cat nomeDoArquivo  % apresentar conteúdo de um arquivo   
+n)  file -b nomeDoArquivo   % mostra o tipo do arquivo   
 o)  clear   
 p)  grep palavraChave nomeDoArquivo   
 q)  sort nomeDoArquivo    
