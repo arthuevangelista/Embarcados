@@ -31,3 +31,41 @@ e) Digite o seu nome: Olá Arthur
 f) Digite o seu nome: Olá Arthur    
 
 4_  
+
+#include <stdio.h>
+
+int main(int argc, char \*argv[]){  
+	int i = 1;  
+	printf("Olá ");  
+	while(i < argc){  
+		printf("%s ", argv[i]);  
+		i += 1;  
+	}  
+	printf("\n");  
+	return 0;  
+}  
+
+5_  
+
+a) Olá Eu Mesmo  
+b) Olá Eu Mesmo  
+c) Olá  
+d) Olá  
+e) Olá  
+f) Olá  
+
+6_  
+
+#include <stdio.h>  
+
+int main(int argc, char \*argv[]){  
+	int i = 1;  
+	printf("Olá ");  
+	while(i < argc){  
+		printf("%s ", argv[i]);  
+		i += 1;  
+	}  
+	printf("\n");  
+	printf("Numero de entradas = %d\n", argc);  
+	return 0;  
+}  
