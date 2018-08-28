@@ -7,6 +7,8 @@ Embarcados - 1.2018
     cat Ola_mundo.txt  
 
 2_  
+    cd ..
+    cd ..
     ls  
 
     % documentos apresentados
@@ -17,6 +19,8 @@ Embarcados - 1.2018
     % dev    initrd.img.old  media       root  srv   var
 
 3_  
+    cd ..
+    cd ..  
     ls -l
 
     % Foi apresentado:
@@ -51,11 +55,9 @@ Embarcados - 1.2018
 
 4_  sudo -s
     cd root
-    ls -l
-
-5_  sudo -s
-    cd root
     ls -d
+
+5_  
 
 6_  
 
