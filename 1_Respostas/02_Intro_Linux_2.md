@@ -58,17 +58,27 @@ Embarcados - 1.2018
     ls -d
 
 5_  
+    for i in 20181120 20171120 20161120 20151120 20141120 20131120 20121120 20111120 20101120 20091120 20081120;
+    do date -d $i >> out.txt;
+    done
 
-6_  
+6_  ls ./Arqs_aula_02/ > list_text.txt;
+    grep ".txt$" list_text.txt > out.txt
 
-7_  
+7_  ls ./Arqs_aula_02/ > list_text.txt;
+    grep ".png$" list_text.txt > out.txt
 
-8_  
+8_  ls ./Arqs_aula_02/ > list_text.txt;
+    grep ".jpg$" list_text.txt > out.txt
 
-9_  
+9_  ls ./Arqs_aula_02/ > list_text.txt;
+    grep ".gif$" list_text.txt > out.txt
 
-10_
+10_ ls ./Arqs_aula_02/ > list_text.txt;
+    grep "cal" list_text.txt > out.txt
 
-11_
+11_ ls ./Arqs_aula_02/ > list_text.txt;
+    grep "tux" list_text.txt > out.txt
 
-12_
+12_ ls ./Arqs_aula_02/ > list_text.txt;
+    grep "^tux" list_text.txt > out.txt
