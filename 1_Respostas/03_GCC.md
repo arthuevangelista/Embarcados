@@ -69,3 +69,20 @@ int main(int argc, char \*argv[]){
 	printf("Numero de entradas = %d\n", argc);  
 	return 0;  
 }  
+
+7_  
+
+#include <stdio.h>
+
+int main(int argc, char \*argv[]){  
+	int i = 1;  
+	printf("Argumentos: ");  
+	while(i < argc){  
+		printf("%s ", argv[i]);  
+		i += 1;  
+	}  
+	printf("\n");  
+	return 0;  
+}  
+
+8_  
