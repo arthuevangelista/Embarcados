@@ -99,9 +99,9 @@ Função num_caracs.h:
 
 Função num_caracs.c:  
 	"  
-	#include <stdio.h>  
-	#include <stdlib.h>  
-	#include "num_caracs.h"  
+	\#include <stdio.h>  
+	\#include <stdlib.h>  
+	\#include "num_caracs.h"  
 
 	int Num_Caracs(char \*string){  
 		int i = 0;  
