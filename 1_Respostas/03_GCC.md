@@ -2,7 +2,7 @@ Embarcados - 1.2018
 
 1_  
 
-#include <stdio.h>  
+\#include <stdio.h>  
 
 int main(){  
 	printf("Olá mundo!\n");  
@@ -11,7 +11,7 @@ int main(){
 
 2_  
 
-#include <stdio.h>  
+\#include <stdio.h>  
 
 int main(){  
 	char nome[100];  
@@ -32,7 +32,7 @@ f) Digite o seu nome: Olá Arthur
 
 4_  
 
-#include <stdio.h>
+\#include <stdio.h>
 
 int main(int argc, char \*argv[]){  
 	int i = 1;  
@@ -56,7 +56,7 @@ f) Olá
 
 6_  
 
-#include <stdio.h>  
+\#include <stdio.h>  
 
 int main(int argc, char \*argv[]){  
 	int i = 1;  
@@ -72,9 +72,9 @@ int main(int argc, char \*argv[]){
 
 7_  
 
-#include <stdio.h>
+\#include <stdio.h>  
 
-int main(int argc, char \*argv[]){  
+int main(int argc, char \*argv[]){    
 	int i = 1;  
 	printf("Argumentos: ");  
 	while(i < argc){  
@@ -86,3 +86,65 @@ int main(int argc, char \*argv[]){
 }  
 
 8_  
+
+Função num_caracs.h:  
+		"  
+		\#ifndef NUM_CARACS_H  
+		\#define NUM_CARACS_H  
+
+		int Num_Caracs(char \*string);  
+
+		\#endif  
+		"  
+
+Função num_caracs.c:  
+	"  
+	#include <stdio.h>  
+	#include <stdlib.h>  
+	#include "num_caracs.h"  
+
+	int Num_Caracs(char \*string){  
+		int i = 0;  
+		while(string[i] != '\0'){  
+			i++;  
+		}  
+		return i;  
+	}  
+
+	int main(){  
+		int num_char;  
+		char string[100];  
+		printf("Digite uma string: ");  
+		scanf("%s", string);  
+		num_char = Num_Caracs(string);  
+		printf("Número de caracteres: %d\n", num_char);  
+		return 0;  
+	}  
+	"  
+
+9_  
+
+	\#include <stdio.h>  
+	\#include <stdlib.h>  
+	\#include "num_caracs.h"  
+
+	int Num_Caracs(char \*string){  
+		int i = 0;  
+		while(string[i] != '\0'){  
+			i++;  
+		}  
+		return i;  
+	}  
+
+	int main(int argc, char \*argv[]){  
+		int i = 0;  
+		printf("Olá ");  
+		while(i < argc){  
+			printf("Argumento: %s / Numero de caracteres: %d", argv[i], Num_Caracs(argv[i]));  
+			i += 1;  
+		}  
+		printf("\n");  
+		return 0;  
+	}  
+
+10_  

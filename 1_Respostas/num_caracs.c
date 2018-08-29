@@ -1,4 +1,6 @@
-#include 'num_caracs.h'
+#include <stdio.h>
+#include <stdlib.h>
+#include "num_caracs.h"
 
 int Num_Caracs(char *string){
 	int i = 0;
@@ -14,5 +16,6 @@ int main(){
 	printf("Digite uma string: ");
 	scanf("%s", string);
 	num_char = Num_Caracs(string);
+	printf("Número de caracteres: %d\n", num_char);
 	return 0;
 }
