@@ -11,11 +11,13 @@ int Num_Caracs(char *string){
 }
 
 int main(int argc, char *argv[]){
-	int i = 0;
+	int i = 0; int total = 0; int numero;
 	while(i < argc){
-		printf("Argumento: %s / Numero de caracteres: %d", argv[i], Num_Caracs(argv[i]));
+		numero = Num_Caracs(argv[i]);
+		printf("Argumento: %s / Numero de caracteres: %d\n", argv[i], numero);
 		i += 1;
-		printf("\n");
+		total += numero;
 	}
+	printf("Total de caracteres de entrada: %d\n", total);
 	return 0;
 }
