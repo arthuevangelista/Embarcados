@@ -42,3 +42,46 @@ Embarcados - 1.2018
     fclose(ola);  
     return 0;  
   }    
+
+3_  
+
+  \#include <stdio.h>  
+  \#include <stdlib.h>  
+  \#include <string.h>  
+
+  int main(int argc, char \*argv[]){  
+    FILE \*ola;  
+    char nome[50];  
+    int idade;  
+
+    strcpy(nome, argv[1]);  
+    idade = atoi(argv[2]);  
+    char tempNome[50];  
+    strcpy(tempNome, nome);  
+    strcat(tempNome,".txt");  
+    ola = fopen(tempNome, "w+");  
+
+    if(!ola)  printf("ERRO 404");  
+
+    fprintf(ola, "Nome: %s\n", nome);  
+    fprintf(ola, "Idade: %d\n", idade);  
+
+    fclose(ola);  
+    return 0;  
+  }  
+
+4_  
+
+BIB_ARQS_H:
+"
+  #ifndef BIB_ARQS_H
+  #define  BIB_ARQS_H
+
+  int tam_arq_texto(char \*nome_arquivo);
+
+  \#endif
+"
+BIB_ARQS_C:
+"
+
+"
