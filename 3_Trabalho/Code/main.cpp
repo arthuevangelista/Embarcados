@@ -26,7 +26,6 @@
 
 // Tempo de start-up dos dois sensores
 #define INIT_TIME_MPU_6050		100 // ms
-#define INIT_TIME_MPU_6050		100 // ms
 // Constantes úteis
 #define	RTMATH_PI             3.1415926535
 #define	RTMATH_DEGREE_TO_RAD  (RTMATH_PI / 180.0)
@@ -74,8 +73,72 @@ volatile torsion anguloDeTorcao;
 // Declaração dos vetores dos objetos a serem instanciados
 // =======================================================================
 
-RTIMUSettings *settings[2];
-RTIMU *imu[2];
+volatile RTIMUSettings *settings[2];
+volatile RTIMU *imu[2];
+
+// =======================================================================
+// thread para processamento dos dados na struct
+// =======================================================================
+void* procDadosDir(void* unused){
+  // Calculo do ângulo de Flexão
+  anguloDeFlexao.meiaAsaDireita = copysign((imu_struct[0].pitch - std::abs(imu_struct[2].pitch)), imu_struct[0].pitch);
+  // Calculo do ângulo de Torção
+  anguloDeTorcao.meiaAsaDireita = copysign((imu_struct[0].roll - std::abs(imu_struct[2].roll)), imu_struct[0].roll);
+
+  return NULL;
+} // FIM DA THREAD procDadosDir
+
+void* procDadosEsq(void* unused){
+  // Calculo do ângulo de Flexão
+  anguloDeFlexao.meiaAsaEsquerda = copysign((imu_struct[1].pitch - std::abs(imu_struct[2].pitch)), imu_struct[1].pitch);
+  // Calculo do ângulo de Torção
+  anguloDeTorcao.meiaAsaEsquerda = copysign((imu_struct[1].roll - std::abs(imu_struct[2].roll)), imu_struct[1].roll);
+
+  return NULL;
+} // FIM DA THREAD procDadosEsq
+
+// =======================================================================
+// thread para armazenamento dos dados
+// =======================================================================
+static pthread_mutex_t mutexLock;
+
+void* fileHandler(void* dados){
+	// Sub-rotina dedicada a apenas armazenar o valor enviado para thread
+	// em um arquivo. A chave MUTEX será utilizada para que:
+	//
+	// i) Os próximos dados podem estar prontos antes que a thread tenha
+	// salvo os dados da iteração anterior; e
+	// ii) A próxima thread pode ser chamada antes que a thread atual tenha
+	// salvo os dados.
+	//
+	// Em outras palavras, utilizaremos a chave MUTEX para evitar as condições
+	// de corrida crítica citadas acima.
+
+	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
+	char buffer[50];
+	snprintf(buffer, sizeof(char)*50, "/temp/resultados_%s_%s.txt", __DATE__, __TIME__);
+
+	FILE *fp = fopen(buffer, "a");
+
+	if (fp == NULL){
+		// Se não for possível abrir o arquivo, EXIT_FAILURE
+		fprintf(stderr, "Não foi possível realizar a abertura do arquivo %s na linha # %d\n", __FILE__,__LINE__);
+		exit(EXIT_FAILURE);
+	}else{
+		// Caso tenha sido possível realizar a abertura do arquivo, locka a chave
+		// MUTEX e armazena os dados no arquivo
+		pthread_mutex_lock(&mutexLock);
+
+		fputs("%f\t\t%f\t\t%f\t\t%f" anguloDeFlexao.meiaAsaDireita, anguloDeFlexao.meiaAsaEsquerda, anguloDeTorcao.meiaAsaDireita, anguloDeTorcao.meiaAsaEsquerda);
+		fputs("\t\t%f\t\t%f\t\t%f", imu_struct[2].roll, imu_struct[2].pitch, imu_struct[2].yaw);
+		// fputs("\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ);
+		fputs("\n");
+
+		pthread_mutex_unlock(&mutexLock);
+	} // FIM DA CONDICIONAL IF-ELSE
+	fclose(fp);
+	return NULL;
+} // FIM DA THREAD fileHandler
 
 // =======================================================================
 // Função de inicialização do GPS
@@ -100,8 +163,10 @@ int main (){
 	int processadorIMU;
 
 	// Declaração das threads a serem usadas para processamento de dados
-	pthread_t processamentoDireita; int rDireita; int iDir = 0;
-	pthread_t processamentoEsquerda; int rEsquerda; int iEsq = 1;
+	pthread_t processamentoDireita;
+	pthread_t processamentoEsquerda;
+	// pthread_t threadKalmanFusion;
+	pthread_t threadFileHandler;
 
 	// Setup da lib wiringPi para uso do GPIO
   wiringPiSetup();
@@ -124,10 +189,10 @@ int main (){
   digitalWrite(MPU_6050_0_PIN, LOW);
   digitalWrite(MPU_6050_1_PIN, HIGH);
 	usleep(INIT_TIME_MPU_6050);
-  initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_0", 0);
+  initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_0", 0, settings, imu);
 	buzzerTone('C', 100);
 	buzzerTone('X', 100);
-	initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_1", 1);
+	initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_1", 1, settings, imu);
 	buzzerTone('D', 100);
 	buzzerTone('X', 100);
 
@@ -136,7 +201,7 @@ int main (){
   digitalWrite(MPU_6050_0_PIN, LOW);
   digitalWrite(MPU_6050_1_PIN, LOW);
 	usleep(INIT_TIME_MPU_9250);
-  initIMU("../../../Embarcados/3_Trabalho/Code/MPU9250_2", 2);
+  initIMU("../../../Embarcados/3_Trabalho/Code/MPU9250_2", 2, settings, imu);
 	buzzerTone('E', 100);
 	buzzerTone('X', 100);
 
@@ -164,7 +229,7 @@ int main (){
 			switch (contadorIMU) {
 				case 0:
 				case 1:
-					leituraIMU(contadorIMU, sampleCount, sampleRate, rateTimer, displayTimer, now);
+					leituraIMU(contadorIMU, sampleCount, sampleRate, rateTimer, displayTimer, now, imu, imu_struct);
 					break;
 				case 2:
 					digitalWrite(MPU_9250_PIN, HIGH);
@@ -182,12 +247,25 @@ int main (){
 		// =======================================================================
 		// thread para processamento dos dados na struct
 		// =======================================================================
-		rDireita = pthread_create (&processamentoDireita, NULL, &procDados, &iDir);
-		rEsquerda = pthread_create (&processamentoEsquerda, NULL, &procDados, &iEsq);
-		rDireita = pthread_join(processamentoDireita, NULL);
-		rEsquerda = pthread_join(processamentoEsquerda, NULL);
+		pthread_create (&processamentoDireita, NULL, &procDadosDir, NULL);
+		pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, NULL);
+		// pthread_create (&threadKalmanFusion, NULL, &kalmanFusion, NULL);
+		pthread_join(processamentoDireita, NULL);
+		pthread_join(processamentoEsquerda, NULL);
+		// pthread_join(threadKalmanFusion, NULL);
+
+		// =======================================================================
+		// thread para processamento dos dados na struct
+		// =======================================================================
+		pthread_create(&threadFileHandler, NULL, &fileHandler, NULL);
+		pthread_join(threadFileHandler, NULL);
 
 	} // FIM DO LOOP INFINITO
+	pthread_mutex_destroy(&mutexLock);
+
+	// =======================================================================
+	// Pós-processamento dos dados (FFT) e plot dos gráficos
+	// =======================================================================
 
 	return 0;
 } // FIM DA FUNÇÃO MAIN
