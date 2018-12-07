@@ -15,7 +15,7 @@ int rc;
 struct timeval tv;
 
 struct gps_data_t gps_data;
-if ((rc = gps_open("localhost", "2947", &gps_data)) == -1) {
+if ((rc = gps_open(source.server, source.port, &gps_data)) == -1) {
     printf("code: %d, reason: %s\n", rc, gps_errstr(rc));
     return EXIT_FAILURE;
 }
