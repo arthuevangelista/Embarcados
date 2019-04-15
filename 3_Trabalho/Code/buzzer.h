@@ -1,6 +1,6 @@
-#ifndef _BUZZER_HPP_
+#ifndef _BUZZER_H_
 
-#define _BUZZER_HPP_
+#define _BUZZER_H_
 
 #include <softTone.h>
 #define buzzerPin 26
