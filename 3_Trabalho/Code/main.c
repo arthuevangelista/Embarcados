@@ -1,7 +1,43 @@
-// g++ main.cpp -o main -lwiringPi -lpthread
-
-// meiaAsaDireita = imu_struct[0]
-// meiaAsaEsquerda = imu_struct[1]
+/* =======================================================================
+ * SISTEMA DE AQUISIÇÃO DE DADOS
+ * =======================================================================
+ * Universidade de Brasília
+ * campus Gama
+ *
+ * Versão: rev 2.0
+ * Autor: Arthur Evangelista
+ * Matrícula: 14/0016686
+ *
+ * Código open-source
+ * =======================================================================
+ * Este código implementa um sistema de aquisição de dados. Ele utiliza
+ * dois sensores MPU-6050, um em cada meia asa, um sensor MPU-9250, no
+ * centro da aeronave, um GPS também no centro da aeronave, um botão
+ * para inicialização do sistema e um buzzer para sinalizar a condição
+ * do sistema.
+ *
+ *  (i) O buzzer apitará um toque uma única vez para sinalizar que o
+ * sistema foi inicilizado com sucesso.
+ *
+ * (ii) Apitará diversas vezes por alguns segundos afim de sinalizar
+ * que ocorreu algum erro no sistema que deve ser analisado no terminal.
+ *
+ * (iii) Apitará uma única vez, por meio segundo, para sinalizar que o
+ * sistema foi desligado. Neste momento, os dados serão salvos antes
+ * do código sinalizar a terminação da presente sessão da raspberry.
+ *
+ * Para compilar este código, siga o esquemático e insira a linha abaixo
+ * no terminal da raspberry pi:
+ *
+ * g++ main.cpp -o main -lwiringPi -lpthread
+ * =======================================================================
+ * Para rápida referência, as structs estão enumeradas da seguinte forma:
+ *
+ * meiaAsaDireita = imu_struct[0]
+ * meiaAsaEsquerda = imu_struct[1]
+ * Aviao = imu_struct[2]
+ * =======================================================================
+ */
 
 // =======================================================================
 // INICIALICAÇÃO DAS BIBLIOTECAS EM COMUM
@@ -12,14 +48,14 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <wiringPi.h>
+#include <wiringPiI2C.h>
 #include <sys/types.h>
-#include <cmath>
 
 #include "RTIMULib.h"
 
-#include "buzzer.hpp"
-#include "implementacaoIMU.hpp"
-#include "implementacaoGPS.hpp"
+#include "buzzer.h"
+#include "implementacaoIMU.h"
+#include "implementacaoGPS.h"
 
 // =======================================================================
 // define das constantes
@@ -27,10 +63,7 @@
 
 // Tempo de start-up dos dois sensores
 #define INIT_TIME_MPU_6050		100 // ms
-// Constantes úteis
-#define	RTMATH_PI             3.1415926535
-#define	RTMATH_DEGREE_TO_RAD  (RTMATH_PI / 180.0)
-#define	RTMATH_RAD_TO_DEGREE  (180.0 / RTMATH_PI)
+
 // Pinos utilizados
 #define MPU_6050_0_PIN 27
 #define MPU_6050_1_PIN 22
@@ -39,12 +72,12 @@
 // =======================================================================
 // typedef das structs que armazenarão os dados
 // =======================================================================
-typedef struct MPU6050{
+typedef struct IMU{
 	// Dados da Fusão dos Dados
 	double roll;
 	double pitch;
 	double yaw;
-}MPU6050;
+}IMU;
 
 // =======================================================================
 // typedef das structs que armazenarão os dados
@@ -65,7 +98,7 @@ typedef struct torsion{
 
 // imu_struct[0] e imu_struct[1] são para MPU-6050
 // imu_struct[2] para MPU-9250
-volatile MPU6050 imu_struct[2];
+volatile IMU imu_struct[2];
 // volatile é utilizado para evitar otimizações excessivas do compilador
 volatile bend anguloDeFlexao;
 volatile torsion anguloDeTorcao;
@@ -75,7 +108,7 @@ volatile torsion anguloDeTorcao;
 // =======================================================================
 
 volatile RTIMUSettings *settings[2];
-volatile RTIMU *imu[2];
+volatile RTIMU *unit_imu[2];
 
 // =======================================================================
 // thread para processamento dos dados na struct
@@ -190,10 +223,10 @@ int main (){
   digitalWrite(MPU_6050_0_PIN, LOW);
   digitalWrite(MPU_6050_1_PIN, HIGH);
 	usleep(INIT_TIME_MPU_6050);
-  initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_0", 0, settings, imu);
+  initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_0", 0, settings, unit_imu);
 	buzzerTone('C', 100);
 	buzzerTone('X', 100);
-	initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_1", 1, settings, imu);
+	initIMU("../../../Embarcados/3_Trabalho/Code/MPU6050_1", 1, settings, unit_imu);
 	buzzerTone('D', 100);
 	buzzerTone('X', 100);
 
@@ -202,7 +235,7 @@ int main (){
   digitalWrite(MPU_6050_0_PIN, LOW);
   digitalWrite(MPU_6050_1_PIN, LOW);
 	usleep(INIT_TIME_MPU_9250);
-  initIMU("../../../Embarcados/3_Trabalho/Code/MPU9250_2", 2, settings, imu);
+  initIMU("../../../Embarcados/3_Trabalho/Code/MPU9250_2", 2, settings, unit_imu);
 	buzzerTone('E', 100);
 	buzzerTone('X', 100);
 
@@ -230,7 +263,7 @@ int main (){
 			switch (contadorIMU) {
 				case 0:
 				case 1:
-					leituraIMU(contadorIMU, sampleCount, sampleRate, rateTimer, displayTimer, now, imu, imu_struct);
+					leituraIMU(contadorIMU, sampleCount, sampleRate, rateTimer, displayTimer, now, unit_imu, imu_struct);
 					break;
 				case 2:
 					digitalWrite(MPU_9250_PIN, HIGH);
