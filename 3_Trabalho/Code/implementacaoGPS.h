@@ -1,0 +1,6 @@
+#ifndef _IMPLEMENTACAOGPS_H_
+#define _IMPLEMENTACAOGPS_H_
+
+
+
+#endif // _IMPLEMENTACAOGPS_H_
