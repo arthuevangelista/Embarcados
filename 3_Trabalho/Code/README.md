@@ -4,9 +4,9 @@
   Universidade de Brasília
   campus Gama
  
-  Versão: rev 2.0
-  Autor: Arthur Evangelista
-  Matrícula: 14/0016686
+  Versão: rev 3.4   
+  Autor: Arthur Evangelista   
+  Matrícula: 14/0016686   
  
   Código open-source
   =======================================================================
