@@ -1,6 +1,6 @@
-# =====================================
+# =======================================
 # SISTEMA DE AQUISIÇÃO DE DADOS
-# =====================================
+# =======================================
   Universidade de Brasília
   campus Gama
  
@@ -16,9 +16,9 @@
   para inicialização do sistema e um buzzer para sinalizar a condição
   do sistema.
   
-  (i) O buzzer apitará um toque uma única vez para sinalizar que o sistema foi inicilizado com sucesso;
-  (ii) Apitará diversas vezes por alguns segundos afim de sinalizar que ocorreu algum erro no sistema que deve ser analisado no terminal;
-  (iii) Apitará uma única vez, por meio segundo, para sinalizar que o sistema foi desligado. Neste momento, os dados serão salvos antes do código sinalizar a terminação da presente sessão da raspberry;
+  (i) O buzzer apitará um toque uma única vez para sinalizar que o sistema foi inicilizado com sucesso; 
+  (ii) Apitará diversas vezes por alguns segundos afim de sinalizar que ocorreu algum erro no sistema que deve ser analisado no terminal; 
+  (iii) Apitará uma única vez, por meio segundo, para sinalizar que o sistema foi desligado. Neste momento, os dados serão salvos antes do código sinalizar a terminação da presente sessão da raspberry; 
   (iv) ...
   
   =======================================================================
@@ -27,7 +27,7 @@
   meiaAsaDireita = imu_struct[0]
   meiaAsaEsquerda = imu_struct[1]
   Aviao = imu_struct[2]
-# =====================================
+# =======================================
 
 Por enquanto o código não é compilável.
 
