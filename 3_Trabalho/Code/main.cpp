@@ -4,7 +4,7 @@
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.4
+ * Versão: rev 3.5
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
@@ -92,7 +92,7 @@ typedef struct torsion{
 }torsion;
 
 // =======================================================================
-// Declaração das structs dos IMUs (GLOBAL)
+// Variáveis Globais
 // =======================================================================
 
 // imu_struct[0] e imu_struct[1] são para MPU-6050
@@ -169,9 +169,19 @@ void* fileHandler(void* dados){
 // =======================================================================
 // Função de inicialização do GPS
 // =======================================================================
- //void initGPS(){
+void* threadGPS(void* dataGPS){
+  /* Essa thread recebe o endereço de memória da variável dataGPS
+   * (que é um ponteiro) e passa para um ponteiro para ponteiro temporário
+   * para modificação da variável. Depois esta variável temporária é liberada.
+   */
+  gps_data** temp;
+  temp = (gps_data**)malloc(sizeof(gps_data));
+  temp = (gps_data**) dataGPS();
 
-//} //	FIM INIT GPS
+  /* CODE MANIPULANDO (*temp)->valor[i].etc */
+
+  free(temp);
+} //	FIM DA THREAD DO GPS
 
 // =======================================================================
 // Função principal main
@@ -210,16 +220,26 @@ int main (){
 // =======================================================================
 // INICIALIZAÇÃO DO GPS
 // =======================================================================
-/* gps_data* dataGPS = initGPS();
-* 			(gps_data não precisa ser uma var global)
-* No loop infinito, realizar a leitura constante do GPS
-* pthread_create com a thread chamando a leitura do GPS
-*/
+/* gps_data* é um ponteiro para dataGPS. Ficar atento pois todas as
+ * as passagens desta variáveis possuem o intuito de serem por ref.
+ * Portanto, há a necessidade do malloc antes do uso da variável.
+ */
+  gps_data* dataGPS;
+  dataGPS = (gps_data*)malloc(sizeof(gps_data));
+  dataGPS = initGPS();
 
 	// Loop infinito
 	while(digitalRead(CONTROL_BUTTON_PIN)){
 		contadorIMU = 0;
 		processadorIMU = 0;
+
+    // =======================================================================
+    // thread para leitura constante do GPS
+    // =======================================================================
+    if( pthread_create (&threadGPS, NULL, &threadGPS, (void *) &dataGPS)) != 0){
+      fprintf(stderr, "Erro na inicialização da thread do GPS na linha # %d\n", __LINE__);
+      exit(EXIT_FAILURE);
+    }
 
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
@@ -255,6 +275,7 @@ int main (){
 
 	} // FIM DO LOOP INFINITO
 	pthread_mutex_destroy(&mutexLock);
+  pthread_cancel(threadGPS);
 
 	// =======================================================================
 	// Pós-processamento dos dados (FFT) e plot dos gráficos
