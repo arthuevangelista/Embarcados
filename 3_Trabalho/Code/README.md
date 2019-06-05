@@ -23,8 +23,8 @@
   (iii) Apitará uma única vez, por meio segundo, para sinalizar que o sistema foi desligado. Neste momento, os dados serão salvos antes do código sinalizar a terminação da presente sessão da raspberry; 
   
   (iv) ...   
-  
-  =======================================================================
+
+
   Para rápida referência, as structs estão enumeradas da seguinte forma:
  
   meiaAsaDireita = imu_struct[0]
