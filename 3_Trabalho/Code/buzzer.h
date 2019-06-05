@@ -1,11 +1,21 @@
 #ifndef _BUZZER_H_
-
 #define _BUZZER_H_
 
 #include <softTone.h>
-#define buzzerPin 26
+
+#ifndef BUZZER_PIN
+  #define BUZZER_PIN 26
+#endif
+
+#ifdef __cplusplus
+  extern "C"{
+#endif
 
 void buzzerInit();
 void buzzerTone(char nota, int duracao);
 
-#endif // _BUZZER_HPP_
+#ifdef __cplusplus
+  }
+#endif
+
+#endif // _BUZZER_H_
