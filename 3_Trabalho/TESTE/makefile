@@ -5,16 +5,21 @@
 .PHONY: install clean
 
 CC = gcc
-CFLAGS = -g
-LIBS = -lpthread -lrt
+CXX = g++
+CFLAGS = -g -c
+LIBS = -lm -lgps
 
-APPNAME = a14016686chat
-CODE = main.c
+APP1 = a.out
+CODEUM = testeGPS.cpp
+APP2 = b.out
+CODEDOIS = testeGPS2.cpp
 
 install:
-	@echo "Compilando aplicativo de chat ..."
-	$(CC) $(CFLAGS) $(CODE) -o $(APPNAME) $(LIBS)
+	@echo "Compilando aplicativos de teste de GPS ..."
+	@$(CXX) $(CFLAGS) $(CODEUM) -o $(APP1) $(LIBS)
+	@$(CXX) $(CFLAGS) $(CODEDOIS) -o $(APP2) $(LIBS)
 
 clean:
-	@echo "Deletando binário ..."
-	rm -f $(APPNAME)
+	@echo "Deletando binários ..."
+	@rm -f $(APP1)
+	@rm -f $(APP2)
