@@ -37,7 +37,7 @@ dadosFusao df;
 
         fprintf(stderr, "\n");
 
-        // fprintf(stderr, "%f\n", df.latitude);
+	fprintf(stderr, "%f\n", df.latitude);
         // fprintf(stderr, "%f\n", df.longitude);
         // fprintf(stderr, "%f\n", df.altitude);
         // fprintf(stderr, "%f\n", df.velTerrest);
