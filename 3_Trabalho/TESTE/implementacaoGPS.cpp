@@ -14,7 +14,7 @@
 // =======================================================================
 // Função de inicialização do GPS
 // =======================================================================
-void initGPS(gps_data** dataGPS){
+void initGPS(gps_data_t** dataGPS){
   int rc;
 
   fprintf(stderr, "Inicializando GPS ...\n");
@@ -28,7 +28,7 @@ void initGPS(gps_data** dataGPS){
 // =======================================================================
 // Função de leitura dos dados do GPS
 // =======================================================================
-void leituraGPS(gps_data** dataGPS){
+void leituraGPS(gps_data_t** dataGPS){
   /* Espera 2 segundos para receber os dados do GPS */
   if (gps_waiting (**dataGPS, 2000000)) {
       if ((rc = gps_read(**dataGPS)) == -1) {
@@ -50,7 +50,7 @@ void leituraGPS(gps_data** dataGPS){
 // =======================================================================
 // Função de encerramento do daemon do GPS
 // =======================================================================
-void killGPS(gps_data** dataGPS){
+void killGPS(gps_data_t** dataGPS){
   gps_stream(**dataGPS, WATCH_DISABLE, NULL);
   gps_close (**dataGPS);
 } // FIM DA FUNÇÃO killGPS

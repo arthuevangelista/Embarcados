@@ -21,8 +21,8 @@ int main(){
 
 dadosFusao df;
 
-  gps_data* dataGPS;
-  dataGPS = (gps_data*)malloc(sizeof(gps_data));
+  gps_data_t* dataGPS;
+  dataGPS = (gps_data_t*)malloc(sizeof(gps_data_t));
   initGPS(&dataGPS);
 
   while(i <= 10){
