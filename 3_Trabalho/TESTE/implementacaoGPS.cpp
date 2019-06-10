@@ -17,9 +17,9 @@
 void initGPS(gps_data_t** dataGPS){
   int rc;
 
-  fprintf(stderr, "Inicializando GPS ...\n");
+  printf("Inicializando GPS ...\n");
   if((rc = gps_open(GPSD_SHARED_MEMORY, 0, **dataGPS)) == -1){
-    fprintf(stderr, "Erro na inicialização do GPS na linha # %d\nRazão do erro: %s\n", __LINE__, gps_errstr(rc));
+    printf("Erro na inicialização do GPS na linha # %d\nRazão do erro: %s\n", __LINE__, gps_errstr(rc));
     exit(EXIT_FAILURE);
   }
 } // FIM DA FUNÇÃO initGPS
@@ -30,7 +30,7 @@ void initGPS(gps_data_t** dataGPS){
 void leituraGPS(gps_data_t** dataGPS){
   // será usada shared memory
       if ((rc = gps_read(**dataGPS)) == -1) {
-          fprintf(stderr, "Erro ao realizar a leitura do GPS na linha # %d. Código do erro: %s\n",__LINE__, gps_errstr(rc));
+          printf("Erro ao realizar a leitura do GPS na linha # %d. Código do erro: %s\n",__LINE__, gps_errstr(rc));
       }else{
           if (((*dataGPS)->status == STATUS_FIX) &&
               ((*dataGPS)->fix.mode == MODE_2D || (*dataGPS)->fix.mode == MODE_3D) &&
@@ -39,7 +39,7 @@ void leituraGPS(gps_data_t** dataGPS){
                   // Print para fins de testes. Esta linha deve ser comentada!
                   //fprintf(stderr, "\nLatitude: %f\nLongitude: %f\nVelocidade: %f\nMarca de Tempo: %lf\n", (*dataGPS)->fix.latitude, (*dataGPS)->fix.longitude, (*dataGPS)->fix.speed, (*dataGPS)->fix.time);
           }else{
-              fprintf(stderr, "Sem dados do GPS disponíveis!\n");
+              printf("Sem dados do GPS disponíveis!\n");
           }
       } // FIM DO IF DE ESPERA ENTRE LEITURAS
 } // FIM DA FUNÇÃO leituraGPS

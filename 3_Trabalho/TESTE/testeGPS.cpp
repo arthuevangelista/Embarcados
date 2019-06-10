@@ -35,9 +35,9 @@ dadosFusao df;
         df.velSubida = dataGPS->fix.climb;
         df.timestamp = dataGPS->fix.time;
 
-        fprintf(stderr, "\n");
+        printf("\n");
 
-        // fprintf(stderr, "%f\n", df.latitude);
+        fprintf(stderr, "%f\n", df.latitude);
         // fprintf(stderr, "%f\n", df.longitude);
         // fprintf(stderr, "%f\n", df.altitude);
         // fprintf(stderr, "%f\n", df.velTerrest);
@@ -46,7 +46,7 @@ dadosFusao df;
 
         i++;
   } // FIM DO WHILE
-      fprintf(stderr, "%s\n", "Teste realizado com sucesso!");
+      printf("%s\n", "Teste realizado com sucesso!");
       sleep(3);
 
     killGPS(&dataGPS);
