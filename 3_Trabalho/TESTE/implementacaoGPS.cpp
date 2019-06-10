@@ -29,7 +29,7 @@ void initGPS(gps_data_t* dataGPS){
 // =======================================================================
 void leituraGPS(gps_data_t* dataGPS){
   int rc = 0;
-      if ((rc = gps_read(dataGPS) == -1) {
+      if (rc = gps_read(dataGPS) == -1) {
           printf("Erro ao realizar a leitura do GPS na linha # %d. Código do erro: %s\n",__LINE__, gps_errstr(rc));
       }else{
           if ((dataGPS->status == STATUS_FIX) &&
