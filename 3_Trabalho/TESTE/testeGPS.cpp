@@ -23,10 +23,10 @@ dadosFusao df;
 
   gps_data_t* dataGPS;
   dataGPS = (gps_data_t*)malloc(sizeof(gps_data_t));
-  initGPS(&dataGPS);
+  initGPS(dataGPS);
 
   while(i <= 10){
-        leituraGPS(&dataGPS);
+        leituraGPS(dataGPS);
 
         df.latitude = dataGPS->fix.latitude;
         df.longitude = dataGPS->fix.longitude;
@@ -49,7 +49,7 @@ dadosFusao df;
       printf("%s\n", "Teste realizado com sucesso!");
       sleep(3);
 
-    killGPS(&dataGPS);
+    killGPS(dataGPS);
 
     return EXIT_SUCCESS;
 } // FIM DA MAIN
