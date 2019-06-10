@@ -45,12 +45,11 @@ dadosFusao df;
         fprintf(stderr, "%f\n", df.timestamp);
 
         i++;
-  }
+  } // FIM DO WHILE
       fprintf(stderr, "%s\n", "Teste realizado com sucesso!");
       sleep(3);
-}
 
     killGPS(&dataGPS);
 
     return EXIT_SUCCESS;
-  }
+} // FIM DA MAIN

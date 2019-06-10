@@ -38,11 +38,11 @@
 #include <gps.h>
 #include <math.h>
 
-gps_data_t* initGPS();
+void initGPS(gps_data_t** dataGPS);
 
-void leituraGPS(gps_data_t* dataGPS);
+void leituraGPS(gps_data_t** dataGPS);
 
-void killGPS(gps_data_t* dataGPS);
+void killGPS(gps_data_t** dataGPS);
 
 #ifdef __cplusplus
   }
