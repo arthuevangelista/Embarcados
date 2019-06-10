@@ -6,23 +6,32 @@
 
 CXX = g++
 CFLAGS = -Wall
+
+# Caminho do include
 INCPATH = -I.
-LFLAGS = -lm -lgps
 
-# Usado apenas para o link ???
-LIBS = -L/usr/lib/arm-linux-gnueabihf
+# Flags necessarias para o GPS
+LDLIBS = -lm -lgps
 
-APP1 = aout
-CODEUM = testeGPS.cpp
-APP2 = bout
-CODEDOIS = testeGPS2.cpp
+# Listagem dos Objetos
+OBJS = testeGPS.o implementacaoGPS.o
 
-install:
+# Usado para o link
+LOCALLIBDIR = -L/usr/lib/arm-linux-gnueabihf
+
+PROG = aout
+
+CODE = testeGPS.cpp
+
+all: $(PROG)
+
+$(PROG): $(OBJS)
 	@echo "Compilando aplicativos de teste de GPS ..."
-	@$(CXX) -c -g $(CODEUM) -o $(APP1) $(CFLAGS) $(LFLAGS)
-	@$(CXX) -c -g $(CODEDOIS) -o $(APP2) $(CFLAGS) $(LFLAGS)
+	@$(CXX) $(CFLAGS) $(OBJS) -o $@ $(LOCALLIBDIR) $(LDLIBS)
+
+testeGPS.o: implementacaoGPS.h
+implementacaoGPS.o: implementacaoGPS.h
 
 clean:
 	@echo "Deletando binários ..."
-	@rm -f $(APP1)
-	@rm -f $(APP2)
+	@rm -f *~ *.o $(PROG) core a.out
