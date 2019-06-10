@@ -1,23 +1,26 @@
 # Uso:
-# make        # compila o aplicativo
-# make clean  # deleta o binário
+# make        ; compila o aplicativo
+# make clean  ; deleta o binário
 
 .PHONY: install clean
 
-CC = gcc
 CXX = g++
-CFLAGS = -g -c
-LIBS = -lm -lgps
+CFLAGS = -Wall
+INCPATH = -I.
+LFLAGS = -lm -lgps
 
-APP1 = a.out
+# Usado apenas para o link ???
+LIBS = -L/usr/lib/arm-linux-gnueabihf
+
+APP1 = aout
 CODEUM = testeGPS.cpp
-APP2 = b.out
+APP2 = bout
 CODEDOIS = testeGPS2.cpp
 
 install:
 	@echo "Compilando aplicativos de teste de GPS ..."
-	@$(CXX) $(CFLAGS) $(CODEUM) -o $(APP1) $(LIBS)
-	@$(CXX) $(CFLAGS) $(CODEDOIS) -o $(APP2) $(LIBS)
+	@$(CXX) -c -g $(CODEUM) -o $(APP1) $(CFLAGS) $(LFLAGS)
+	@$(CXX) -c -g $(CODEDOIS) -o $(APP2) $(CFLAGS) $(LFLAGS)
 
 clean:
 	@echo "Deletando binários ..."
