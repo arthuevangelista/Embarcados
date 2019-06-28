@@ -55,8 +55,8 @@ DEPS    = $(TESTEIMUPATH)/RTMath.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureBMP180.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureLPS25H.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureMS5611.h \
-    $(TESTEIMUPATH)/IMUDrivers/RTPressureMS5637.h
-		./implementacaoIMU.h
+    $(TESTEIMUPATH)/IMUDrivers/RTPressureMS5637.h \
+		./implementacaoIMU.h \
 		./buzzer.h
 
 OBJECTS = objects/testeIMU.o \
