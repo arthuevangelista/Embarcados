@@ -10,7 +10,7 @@
  * struct igual. Outras funções que necessitem destes dados ou devem
  * receber uma cópia dos dados ou receber a struct completa.
  *
- * De preferência, declare um ponteiro para gps_data na main
+ * De preferência, declare um ponteiro para gps_data_t na main
  * faça a passagem de dados por referência!
  *
  * 2_ A função leituraGPS realiza a leitura dos dados adquiridos pelo GPS
@@ -37,14 +37,16 @@
 
 #include <gps.h>
 #include <math.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-typedef gps_data_t gps_data;
+void initGPS(gps_data_t* dataGPS);
 
-gps_data* initGPS();
+void leituraGPS(gps_data_t* dataGPS);
 
-void leituraGPS(gps_data* dataGPS);
-
-void killGPS(gps_data* dataGPS);
+void killGPS(gps_data_t* dataGPS);
 
 #ifdef __cplusplus
   }

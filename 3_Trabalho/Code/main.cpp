@@ -42,20 +42,31 @@
 // =======================================================================
 // INICIALICAÇÃO DAS BIBLIOTECAS EM COMUM
 // =======================================================================
-#include "RTIMULib.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
 #include <sys/types.h>
 
-#include "buzzer.h"
-#include "implementacaoIMU.h"
-#include "implementacaoGPS.h"
+#include <string.h>
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+
+#ifndef _IMPLEMENTACAOIMU_H_
+  #include "implementacaoIMU.h"
+#endif
+
+#ifndef _IMPLEMENTACAOGPS_H_
+  #include "implementacaoGPS.h"
+#endif
+
+#ifndef _BUZZER_H_
+  #include "buzzer.h"
+#endif
+
+#ifned _RTIMULIB_H
+  #include "RTIMULib.h"
+#endif
 
 // =======================================================================
 // define das constantes
@@ -174,13 +185,13 @@ void* threadGPS(void* dataGPS){
    * (que é um ponteiro) e passa para um ponteiro para ponteiro temporário
    * para modificação da variável. Depois esta variável temporária é liberada.
    */
-  gps_data** temp;
-  temp = (gps_data**)malloc(sizeof(gps_data));
-  temp = (gps_data**) dataGPS();
+
+
+
 
   /* CODE MANIPULANDO (*temp)->valor[i].etc */
 
-  free(temp);
+
 } //	FIM DA THREAD DO GPS
 
 // =======================================================================
@@ -220,13 +231,17 @@ int main (){
 // =======================================================================
 // INICIALIZAÇÃO DO GPS
 // =======================================================================
+
 /* gps_data* é um ponteiro para dataGPS. Ficar atento pois todas as
  * as passagens desta variáveis possuem o intuito de serem por ref.
  * Portanto, há a necessidade do malloc antes do uso da variável.
+ * É passado para initGPS o endereço de memória do ponteiro para que
+ * a função a armazene em um ponteiro para ponteiro. Assim, a
+ * passagem dos parâmetros do ponteiro dataGPS é por referência.
  */
   gps_data* dataGPS;
   dataGPS = (gps_data*)malloc(sizeof(gps_data));
-  dataGPS = initGPS();
+  initGPS(&dataGPS);
 
 	// Loop infinito
 	while(digitalRead(CONTROL_BUTTON_PIN)){
@@ -236,7 +251,7 @@ int main (){
     // =======================================================================
     // thread para leitura constante do GPS
     // =======================================================================
-    if( pthread_create (&threadGPS, NULL, &threadGPS, (void *) &dataGPS)) != 0){
+    if(pthread_create(&threadGPS, NULL, &threadGPS, (void *) &dataGPS)) != 0){
       fprintf(stderr, "Erro na inicialização da thread do GPS na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
