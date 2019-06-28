@@ -90,24 +90,18 @@ RTIMU* initIMU(int i){
 // =======================================================================
 // Função de leitura dos sensores
 // =======================================================================
-void leituraIMU(int i, RTIMU* imu[2], imuDataAngulo imu_struct[2]){
+void leituraIMU(RTIMU* imu, int i /*, imuDataAngulo imu_struct*/){
   // Se for necessário retornar também a taxa de amostragem, referir a:
   // RTIMULib/Linux/RTIMULibDrive/RTIMULibDrive.cpp
+  RTIMU_DATA imuData;
 
   // Realiza o polling na taxa recomendada
-  usleep(imu[i]->IMUGetPollInterval() * 1000);
+  usleep(imu->IMUGetPollInterval() * 1000);
 
-	while(imu[i]->IMURead()){
-		RTIMU_DATA imuData = imu[i]->getIMUData();
-	  insereStruct(i, imuData.fusionPose, imu_struct);
+	while(imu->IMURead()){
+    imuData = imu->getIMUData();
+    imu_struct[i].roll = (imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE);
+    imu_struct[i].pitch = (imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE);
+    imu_struct[i].yaw = (imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE);
 	} // FIM DO WHILE
 } // FIM DA FUNÇÃO leituraIMU
-
-// =======================================================================
-// Função de inserção dos dados na struct de cada sensor
-// =======================================================================
-void insereStruct(int i, RTVector3 &vec, imuDataAngulo imu_struct[]){
-			imu_struct[i].roll = (vec.x() * RTMATH_RAD_TO_DEGREE);
-			imu_struct[i].pitch = (vec.y() * RTMATH_RAD_TO_DEGREE);
-			imu_struct[i].yaw = (vec.z() * RTMATH_RAD_TO_DEGREE);
-} // FIM DA FUNÇÃO insereStruct

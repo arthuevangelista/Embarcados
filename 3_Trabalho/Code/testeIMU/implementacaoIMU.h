@@ -28,8 +28,6 @@
 
 RTIMU* initIMU(int i);
 
-void leituraIMU(int i, int &sampleCount, int &sampleRate, uint64_t &rateTimer, uint64_t &displayTimer, uint64_t &now, RTIMU* imu[2], MPU6050 imu_struct[]);
-
-void insereStruct(int i, RTVector3& vec, MPU6050 imu_struct[]);
+void leituraIMU(RTIMU* imu, int i /*,imuDataAngulo imu_struct[2]*/);
 
 #endif // _IMPLEMENTACAOIMU_H_
