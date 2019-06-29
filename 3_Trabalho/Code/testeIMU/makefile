@@ -1,25 +1,25 @@
 TESTEIMUPATH  = RTIMULib
 
-CC    = gcc
-CXX   = g++
-DEFINES     =
+CC    			= gcc
+CXX   			= g++
+DEFINES       	=
 CFLAGS			= -pipe -O2 -Wall -W $(DEFINES)
-CXXFLAGS      = -pipe -O2 -Wall -W $(DEFINES)
-INCPATH       = -I. -I$(TESTEIMUPATH)
-LINK  = g++
+CXXFLAGS      	= -pipe -O2 -Wall -W $(DEFINES)
+INCPATH       	= -I. -I$(TESTEIMUPATH)
+LINK  			= g++
 LFLAGS			= -Wl,-O1
-LIBS  = -L/usr/lib/arm-linux-gnueabihf
-COPY  = cp -f
-COPY_FILE     = $(COPY)
-COPY_DIR      = $(COPY) -r
-STRIP = strip
-INSTALL_FILE  = install -m 644 -p
-INSTALL_DIR   = $(COPY_DIR)
+LIBS  			= -L/usr/lib/arm-linux-gnueabihf
+COPY  			= cp -f
+COPY_FILE     	= $(COPY)
+COPY_DIR      	= $(COPY) -r
+STRIP 			= strip
+INSTALL_FILE  	= install -m 644 -p
+INSTALL_DIR   	= $(COPY_DIR)
 INSTALL_PROGRAM = install -m 755 -p
-DEL_FILE      = rm -f
-SYMLINK       = ln -f -s
-DEL_DIR       = rmdir
-MOVE  = mv -f
+DEL_FILE      	= rm -f
+SYMLINK       	= ln -f -s
+DEL_DIR       	= rmdir
+MOVE  			= mv -f
 CHK_DIR_EXISTS	= test -d
 MKDIR			= mkdir -p
 
@@ -56,8 +56,8 @@ DEPS    = $(TESTEIMUPATH)/RTMath.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureLPS25H.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureMS5611.h \
     $(TESTEIMUPATH)/IMUDrivers/RTPressureMS5637.h \
-		./implementacaoIMU.h \
-		./buzzer.h
+		$(TESTEIMUPATH)/implementacaoIMU.h \
+		$(TESTEIMUPATH)/buzzer.h
 
 OBJECTS = objects/testeIMU.o \
     objects/RTMath.o \

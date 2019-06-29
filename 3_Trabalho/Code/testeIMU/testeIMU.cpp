@@ -60,7 +60,7 @@ void* procDadosDir(void* unused){
   anguloDeTorcao.meiaAsaDireita = copysign((imu_struct[0].roll - std::abs(imu_struct[2].roll)), imu_struct[0].roll);
 
   return NULL;
-} // FIM DA THREAD procDadosDir
+} // FIM DA THREAD procDadosEsqDir
 
 void* procDadosEsq(void* unused){
   // Calculo do ângulo de Flexão
