@@ -2,6 +2,7 @@
 #define _BUZZER_H_
 
 #include <softTone.h>
+#include <time.h>
 
 #ifndef BUZZER_PIN
   #define BUZZER_PIN 26

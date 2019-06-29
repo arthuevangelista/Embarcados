@@ -4,35 +4,35 @@ void buzzerInit(){
 	softToneCreate(BUZZER_PIN);
 }
 
-void buzzerTone(char nota, int duracao){
+void buzzerTone(char nota, int duracao*1000000){
 	switch(nota){
 	case 'C':
 		softToneWrite(BUZZER_PIN, 262); // C4
-		delay(duracao);
+		nanosleep(duracao*1000000);
 	break;
 	case 'D':
 		softToneWrite(BUZZER_PIN, 294); // D4
-		delay(duracao);
+		nanosleep(duracao*1000000);
 	break;
 	case 'E':
     softToneWrite(BUZZER_PIN, 330); // E4
-    delay(duracao);
+    nanosleep(duracao*1000000);
 	break;
 	case 'F':
     softToneWrite(BUZZER_PIN, 349); // F4
-    delay(duracao);
+    nanosleep(duracao*1000000);
 	break;
 	case 'G':
     softToneWrite(BUZZER_PIN, 392); // G4
-    delay(duracao);
+    nanosleep(duracao*1000000);
 	break;
 	case 'A':
     softToneWrite(BUZZER_PIN, 440); // A4
-    delay(duracao);
+    nanosleep(duracao*1000000);
 	break;
 	case 'B':
     softToneWrite(BUZZER_PIN, 494); // B4
-    delay(duracao);
+    nanosleep(duracao*1000000);
 	break;
 	case 'X':
 		softToneWrite(BUZZER_PIN, 0);
