@@ -16,7 +16,7 @@
   #include "buzzer.h"
 #endif
 
-#ifned _RTIMULIB_H
+#ifndef _RTIMULIB_H
   #include "RTIMULib.h"
 #endif
 
