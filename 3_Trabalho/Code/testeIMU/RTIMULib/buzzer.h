@@ -1,6 +1,11 @@
 #ifndef _BUZZER_H_
 #define _BUZZER_H_
 
+
+#ifndef	__WIRING_PI_H__
+  #include <wiringPi.h>
+#endif
+  
 #include <softTone.h>
 #include <time.h>
 
