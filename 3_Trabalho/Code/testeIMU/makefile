@@ -1,13 +1,20 @@
 TESTEIMUPATH  = RTIMULib
 
+<<<<<<< HEAD
 CC    = gcc
 CXX   = g++
 DEFINES      = -lpthread -lwiringPi
+=======
+CC    			= gcc
+CXX   			= g++
+DEFINES       	= -lpthread -lwiringPi
+>>>>>>> a6c2c67d077bbd73abc530c8d30212a9ce9ea046
 CFLAGS			= -pipe -O2 -Wall -W $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W $(DEFINES)
 INCPATH      = -I. -I$(TESTEIMUPATH)
 LINK  = g++
 LFLAGS			= -Wl,-O1
+<<<<<<< HEAD
 LIBS  = -L/usr/lib/arm-linux-gnueabihf $(DEFINES)
 COPY  = cp -f
 COPY_FILE     = $(COPY)
@@ -15,6 +22,15 @@ COPY_DIR      = $(COPY) -r
 STRIP = strip
 INSTALL_FILE  = install -m 644 -p
 INSTALL_DIR   = $(COPY_DIR)
+=======
+LIBS  			= -L/usr/lib/arm-linux-gnueabihf $(DEFINES)
+COPY  			= cp -f
+COPY_FILE     	= $(COPY)
+COPY_DIR      	= $(COPY) -r
+STRIP 			= strip
+INSTALL_FILE  	= install -m 644 -p
+INSTALL_DIR   	= $(COPY_DIR)
+>>>>>>> a6c2c67d077bbd73abc530c8d30212a9ce9ea046
 INSTALL_PROGRAM = install -m 755 -p
 DEL_FILE      = rm -f
 SYMLINK       = ln -f -s
