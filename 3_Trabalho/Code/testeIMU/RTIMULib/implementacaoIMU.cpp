@@ -27,7 +27,7 @@ RTIMU* initIMU(int i){
       switch (i) {
         case 0:
           // Referencia a pasta e o nome do arquivo que possui o .ini
-          settings = new RTIMUSettings("initFiles", "MPU6050_0");
+          settings = new RTIMUSettings("./initFiles", "MPU6050_0");
 
           // Cria o objeto i do IMU
     		  imu = RTIMU::createIMU(settings);
@@ -46,7 +46,7 @@ RTIMU* initIMU(int i){
           buzzerTone('X', 100);
           break;
         case 1:
-          settings = new RTIMUSettings("initFiles", "MPU6050_1");
+          settings = new RTIMUSettings("./initFiles", "MPU6050_1");
 
           imu = RTIMU::createIMU(settings);
 
@@ -64,7 +64,7 @@ RTIMU* initIMU(int i){
           buzzerTone('X', 100);
           break;
         case 2:
-          settings = new RTIMUSettings("initFiles", "MPU9250_2");
+          settings = new RTIMUSettings("./initFiles", "MPU9250_2");
 
           imu = RTIMU::createIMU(settings);
 
