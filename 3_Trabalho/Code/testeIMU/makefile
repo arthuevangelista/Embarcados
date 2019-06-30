@@ -2,13 +2,13 @@ TESTEIMUPATH  = RTIMULib
 
 CC    			= gcc
 CXX   			= g++
-DEFINES       	=
+DEFINES       	= -lpthread -lwiringPi
 CFLAGS			= -pipe -O2 -Wall -W $(DEFINES)
 CXXFLAGS      	= -pipe -O2 -Wall -W $(DEFINES)
 INCPATH       	= -I. -I$(TESTEIMUPATH)
 LINK  			= g++
 LFLAGS			= -Wl,-O1
-LIBS  			= -L/usr/lib/arm-linux-gnueabihf
+LIBS  			= -L/usr/lib/arm-linux-gnueabihf $(DEFINES)
 COPY  			= cp -f
 COPY_FILE     	= $(COPY)
 COPY_DIR      	= $(COPY) -r
