@@ -94,6 +94,7 @@ void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct){
   // Se for necessário retornar também a taxa de amostragem, referir a:
   // RTIMULib/Linux/RTIMULibDrive/RTIMULibDrive.cpp
   RTIMU_DATA imuData;
+  volatile imuDataAngulo imu_struct;
 
   // Realiza o polling na taxa recomendada
   usleep(imu->IMUGetPollInterval() * 1000);

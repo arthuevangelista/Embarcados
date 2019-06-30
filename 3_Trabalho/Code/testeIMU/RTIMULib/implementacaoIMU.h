@@ -26,6 +26,12 @@
   #include "RTIMULib.h"
 #endif
 
+typedef struct imuDataAngulo{
+	double roll;
+	double pitch;
+	double yaw;
+}imuDataAngulo;
+
 RTIMU* initIMU(int i);
 
 void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct);
