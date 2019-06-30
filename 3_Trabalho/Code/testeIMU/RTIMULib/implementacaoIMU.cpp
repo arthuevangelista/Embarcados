@@ -90,7 +90,7 @@ RTIMU* initIMU(int i){
 // =======================================================================
 // Função de leitura dos sensores
 // =======================================================================
-void leituraIMU(RTIMU* imu, int i /*, imuDataAngulo imu_struct*/){
+void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct){
   // Se for necessário retornar também a taxa de amostragem, referir a:
   // RTIMULib/Linux/RTIMULibDrive/RTIMULibDrive.cpp
   RTIMU_DATA imuData;
