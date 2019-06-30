@@ -43,6 +43,8 @@ volatile torsion anguloDeTorcao;
 // thread para processamento dos dados na struct
 // =======================================================================
 void* procDadosDir(void* unused){
+  imuDataAngulo imu_struct[2];
+  imu_struct = (imuDataAngulo *) unused;
   // Calculo do ângulo de Flexão
   anguloDeFlexao.meiaAsaDireita = copysign((imu_struct[0].pitch - std::abs(imu_struct[2].pitch)), imu_struct[0].pitch);
   // Calculo do ângulo de Torção
@@ -52,6 +54,8 @@ void* procDadosDir(void* unused){
 } // FIM DA THREAD procDadosEsqDir
 
 void* procDadosEsq(void* unused){
+  imuDataAngulo imu_struct[2];
+  imu_struct = (imuDataAngulo *) unused;
   // Calculo do ângulo de Flexão
   anguloDeFlexao.meiaAsaEsquerda = copysign((imu_struct[1].pitch - std::abs(imu_struct[2].pitch)), imu_struct[1].pitch);
   // Calculo do ângulo de Torção
@@ -87,12 +91,12 @@ int main(){
       leituraIMU(imu[contadorIMU], contadorIMU, imu_struct);
     }
 
-    if( pthread_create (&processamentoDireita, NULL, &procDadosDir, NULL) != 0){
+    if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct)) != 0){
       fprintf(stderr, "Erro na inicialização da thread procDadosDir na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
 
-    if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, NULL) != 0){
+    if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, (void*) imu_struct)) != 0){
       fprintf(stderr, "Erro na inicialização da thread procDadosEsq na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
