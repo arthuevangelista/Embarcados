@@ -26,13 +26,6 @@
   #define BUZZER_PIN 26
 #endif
 
-typedef struct imuDataAngulo{
-	// Dados da Fusão dos Dados
-	double roll;
-	double pitch;
-	double yaw;
-}imuDataAngulo;
-
 typedef struct bend{
 	double meiaAsaDireita;
 	double meiaAsaEsquerda;
@@ -42,10 +35,6 @@ typedef struct torsion{
 	double meiaAsaDireita;
 	double meiaAsaEsquerda;
 }torsion;
-
-// imu_struct[0] e imu_struct[1] são para MPU-6050
-// imu_struct[2] para MPU-9250
-volatile imuDataAngulo imu_struct[2];
 
 volatile bend anguloDeFlexao;
 volatile torsion anguloDeTorcao;
@@ -79,6 +68,10 @@ int main(){
   pthread_t processamentoDireita;
 	pthread_t processamentoEsquerda;
 
+  // imu_struct[0] e imu_struct[1] são para MPU-6050
+  // imu_struct[2] para MPU-9250
+  imuDataAngulo imu_struct[2];
+
   wiringPiSetup();
   buzzerInit();
 
@@ -91,7 +84,7 @@ int main(){
 
   while (digitalRead(CONTROL_BUTTON_PIN)){
     for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
-      leituraIMU(imu[contadorIMU], contadorIMU, imu_struct[contadorIMU]);
+      leituraIMU(imu[contadorIMU], contadorIMU, imu_struct);
     }
 
     if( pthread_create (&processamentoDireita, NULL, &procDadosDir, NULL) != 0){
