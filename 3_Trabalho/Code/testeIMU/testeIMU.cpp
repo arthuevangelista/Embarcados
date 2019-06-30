@@ -43,23 +43,45 @@ volatile torsion anguloDeTorcao;
 // thread para processamento dos dados na struct
 // =======================================================================
 void* procDadosDir(void* unused){
-  imuDataAngulo imu_struct[2];
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
   imu_struct = (imuDataAngulo *) unused;
+
+  double pitch0 = imu_struct.pitch;
+  double roll0 = imu_struct.roll;
+
+  imu_struct++;
+  imu_struct++;
+
+  double pitch2 = imu_struct.pitch;
+  double roll2 = imu_struct.roll;
+
   // Calculo do ângulo de Flexão
-  anguloDeFlexao.meiaAsaDireita = copysign((imu_struct[0].pitch - std::abs(imu_struct[2].pitch)), imu_struct[0].pitch);
+  anguloDeFlexao.meiaAsaDireita = copysign((pitch0 - std::abs(pitch2)), pitch0);
   // Calculo do ângulo de Torção
-  anguloDeTorcao.meiaAsaDireita = copysign((imu_struct[0].roll - std::abs(imu_struct[2].roll)), imu_struct[0].roll);
+  anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
 
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
 
 void* procDadosEsq(void* unused){
-  imuDataAngulo imu_struct[2];
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
   imu_struct = (imuDataAngulo *) unused;
+
+  imu_struct++;
+
+  double pitch1 = imu_struct.pitch;
+  double roll1 = imu_struct.roll;
+
+  imu_struct++;
+  double pitch2 = imu_struct.pitch;
+  double roll2 = imu_struct.roll;
+
   // Calculo do ângulo de Flexão
-  anguloDeFlexao.meiaAsaEsquerda = copysign((imu_struct[1].pitch - std::abs(imu_struct[2].pitch)), imu_struct[1].pitch);
+  anguloDeFlexao.meiaAsaEsquerda = copysign((pitch1 - std::abs(pitch2)), pitch1);
   // Calculo do ângulo de Torção
-  anguloDeTorcao.meiaAsaEsquerda = copysign((imu_struct[1].roll - std::abs(imu_struct[2].roll)), imu_struct[1].roll);
+  anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
 
   return NULL;
 } // FIM DA THREAD procDadosEsq
@@ -74,7 +96,8 @@ int main(){
 
   // imu_struct[0] e imu_struct[1] são para MPU-6050
   // imu_struct[2] para MPU-9250
-  imuDataAngulo imu_struct[2];
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
 
   wiringPiSetup();
   buzzerInit();
@@ -88,15 +111,18 @@ int main(){
 
   while (digitalRead(CONTROL_BUTTON_PIN)){
     for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
-      leituraIMU(imu[contadorIMU], contadorIMU, imu_struct);
+      imu_struct += contadorIMU;
+      leituraIMU(imu[contadorIMU], &imu_struct);
     }
 
-    if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct)) != 0){
+  imu_struct -= 2;
+
+    if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct) != 0){
       fprintf(stderr, "Erro na inicialização da thread procDadosDir na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
 
-    if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, (void*) imu_struct)) != 0){
+    if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, (void*) imu_struct) != 0){
       fprintf(stderr, "Erro na inicialização da thread procDadosEsq na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
