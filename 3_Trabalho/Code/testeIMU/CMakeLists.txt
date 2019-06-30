@@ -1,5 +1,5 @@
 SET(DRIVE_SRCS
-    RTIMULibDrive.cpp)
+    testeIMU.cpp)
 
 ADD_EXECUTABLE(testeIMU ${DRIVE_SRCS})
 TARGET_LINK_LIBRARIES(testeIMU RTIMULib)
