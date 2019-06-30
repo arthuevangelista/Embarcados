@@ -100,8 +100,8 @@ void leituraIMU(RTIMU* imu, imuDataAngulo* imu_struct){
 
 	while(imu->IMURead()){
     imuData = imu->getIMUData();
-    *imu_struct.roll = (imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE);
-    *imu_struct.pitch = (imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE);
-    *imu_struct.yaw = (imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE);
+    imu_struct->roll = (imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE);
+    imu_struct->pitch = (imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE);
+    imu_struct->yaw = (imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE);
 	} // FIM DO WHILE
 } // FIM DA FUNÇÃO leituraIMU
