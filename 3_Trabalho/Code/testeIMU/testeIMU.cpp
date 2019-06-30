@@ -47,14 +47,14 @@ void* procDadosDir(void* unused){
   imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
   imu_struct = (imuDataAngulo *) unused;
 
-  double pitch0 = imu_struct.pitch;
-  double roll0 = imu_struct.roll;
+  double pitch0 = imu_struct->pitch;
+  double roll0 = imu_struct->roll;
 
   imu_struct++;
   imu_struct++;
 
-  double pitch2 = imu_struct.pitch;
-  double roll2 = imu_struct.roll;
+  double pitch2 = imu_struct->pitch;
+  double roll2 = imu_struct->roll;
 
   // Calculo do ângulo de Flexão
   anguloDeFlexao.meiaAsaDireita = copysign((pitch0 - std::abs(pitch2)), pitch0);
@@ -71,12 +71,12 @@ void* procDadosEsq(void* unused){
 
   imu_struct++;
 
-  double pitch1 = imu_struct.pitch;
-  double roll1 = imu_struct.roll;
+  double pitch1 = imu_struct->pitch;
+  double roll1 = imu_struct->roll;
 
   imu_struct++;
-  double pitch2 = imu_struct.pitch;
-  double roll2 = imu_struct.roll;
+  double pitch2 = imu_struct->pitch;
+  double roll2 = imu_struct->roll;
 
   // Calculo do ângulo de Flexão
   anguloDeFlexao.meiaAsaEsquerda = copysign((pitch1 - std::abs(pitch2)), pitch1);
@@ -112,7 +112,7 @@ int main(){
   while (digitalRead(CONTROL_BUTTON_PIN)){
     for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
       imu_struct += contadorIMU;
-      leituraIMU(imu[contadorIMU], &imu_struct);
+      leituraIMU(imu[contadorIMU], imu_struct);
     }
 
   imu_struct -= 2;
