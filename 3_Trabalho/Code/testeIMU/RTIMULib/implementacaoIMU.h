@@ -34,6 +34,6 @@ typedef struct imuDataAngulo{
 
 RTIMU* initIMU(int i);
 
-void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct[2]);
+void leituraIMU(RTIMU* imu, imuDataAngulo* imu_struct);
 
 #endif // _IMPLEMENTACAOIMU_H_

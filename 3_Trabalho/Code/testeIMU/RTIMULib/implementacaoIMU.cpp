@@ -90,7 +90,7 @@ RTIMU* initIMU(int i){
 // =======================================================================
 // Função de leitura dos sensores
 // =======================================================================
-void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct[2]){
+void leituraIMU(RTIMU* imu, imuDataAngulo* imu_struct){
   // Se for necessário retornar também a taxa de amostragem, referir a:
   // RTIMULib/Linux/RTIMULibDrive/RTIMULibDrive.cpp
   RTIMU_DATA imuData;
@@ -100,8 +100,8 @@ void leituraIMU(RTIMU* imu, int i, imuDataAngulo imu_struct[2]){
 
 	while(imu->IMURead()){
     imuData = imu->getIMUData();
-    imu_struct[i].roll = (imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE);
-    imu_struct[i].pitch = (imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE);
-    imu_struct[i].yaw = (imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE);
+    *imu_struct.roll = (imuData.fusionPose.x() * RTMATH_RAD_TO_DEGREE);
+    *imu_struct.pitch = (imuData.fusionPose.y() * RTMATH_RAD_TO_DEGREE);
+    *imu_struct.yaw = (imuData.fusionPose.z() * RTMATH_RAD_TO_DEGREE);
 	} // FIM DO WHILE
 } // FIM DA FUNÇÃO leituraIMU
