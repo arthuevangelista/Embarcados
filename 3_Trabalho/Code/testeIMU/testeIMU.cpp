@@ -91,7 +91,7 @@ int main(){
 
   while (digitalRead(CONTROL_BUTTON_PIN)){
     for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
-      leituraIMU(imu[contadorIMU], contadorIMU /*, imu_struct[contadorIMU]*/);
+      leituraIMU(imu[contadorIMU], contadorIMU, imu_struct[contadorIMU]);
     }
 
     if( pthread_create (&processamentoDireita, NULL, &procDadosDir, NULL) != 0){
