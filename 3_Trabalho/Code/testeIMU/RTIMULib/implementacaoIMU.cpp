@@ -82,6 +82,8 @@ RTIMU* initIMU(int i){
           buzzerTone('X', 100);
           break;
         default:
+            printf("Nenhuma unidade IMU identificada!\n");
+            exit(1);
           break;
       } /* FIM DO SWITCH CASE DO BUZZER */
     return imu;
