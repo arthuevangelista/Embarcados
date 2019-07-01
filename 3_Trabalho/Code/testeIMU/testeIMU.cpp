@@ -116,23 +116,25 @@ int main(){
     imu_struct -= 2;
 
     if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct) != 0){
-      fprintf(stderr, "Erro na inicialização da thread procDadosDir na linha # %d\n", __LINE__);
+      fprintf(stderr, "Erro na inicializacao da thread procDadosDir na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
 
     if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, (void*) imu_struct) != 0){
-      fprintf(stderr, "Erro na inicialização da thread procDadosEsq na linha # %d\n", __LINE__);
+      fprintf(stderr, "Erro na inicializacao da thread procDadosEsq na linha # %d\n", __LINE__);
       exit(EXIT_FAILURE);
     }
 
     pthread_join(processamentoDireita, NULL);
     pthread_join(processamentoEsquerda, NULL);
+    
+    system("clear");
 
-    fprintf(stderr, "Torção meia asa Direita: %f\n", anguloDeTorcao.meiaAsaDireita);
-    fprintf(stderr, "Torção meia asa Esquerda: %f\n\n", anguloDeTorcao.meiaAsaEsquerda);
+    fprintf(stderr, "Torcao meia asa Direita: %f\n", anguloDeTorcao.meiaAsaDireita);
+    fprintf(stderr, "Torcao meia asa Esquerda: %f\n\n", anguloDeTorcao.meiaAsaEsquerda);
 
-    fprintf(stderr, "Flexão meia asa Direita: %f\n", anguloDeFlexao.meiaAsaDireita);
-    fprintf(stderr, "Flexão meia asa Esquerda: %f\n", anguloDeFlexao.meiaAsaEsquerda);
+    fprintf(stderr, "Flexao meia asa Direita: %f\n", anguloDeFlexao.meiaAsaDireita);
+    fprintf(stderr, "Flexao meia asa Esquerda: %f\n", anguloDeFlexao.meiaAsaEsquerda);
   }
   return 0;
 }

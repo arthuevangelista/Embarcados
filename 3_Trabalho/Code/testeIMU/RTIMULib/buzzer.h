@@ -10,7 +10,7 @@
 #include <time.h>
 
 #ifndef BUZZER_PIN
-  #define BUZZER_PIN 26
+  #define BUZZER_PIN 7
 #endif
 
 #ifdef __cplusplus
