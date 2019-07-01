@@ -1,0 +1,6 @@
+A melhor opção para plotar gráficos 2D e 3D parece ser o Gnuplot, há também o Allegro como alternativa
+Esses dois sites tem os códigos para usar o gnuplot
+
+https://jeffersonpalheta.wordpress.com/2017/09/03/plotar-graficos-em-c-com-gnuplot/
+
+https://www.vivaolinux.com.br/artigo/Graficos-elaborados-com-GnuPlot-e-PovRay/
