@@ -44,13 +44,17 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
   sleep(3);
   killGPS(dataGPS);
   free(dataGPS);
-  buzzerTone('B',600);
-  buzzerTone('B',600);
-  buzzerTone('A',300);
-  buzzerTone('B',300);
-  buzzerTone('E',600);
-  buzzerTone('D',600);
-  buzzerTone('D',200);
+  buzzerTone('B',100);
+  buzzerTone('X',100);
+  buzzerTone('B',200);
+  buzzerTone('X',100);
+  buzzerTone('A',200);
+  buzzerTone('X',100);
+  buzzerTone('B',100);
+  buzzerTone('X',100);
+  buzzerTone('E',100);
+  buzzerTone('X',100);
+  buzzerTone('D',300);
   buzzerTone('X',100);
   exit(EXIT_SUCCESS);
 }
