@@ -4,12 +4,19 @@
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.5
+ * Versão: rev 3.6
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
  * Código open-source
  * =======================================================================
+ * Falta:
+ * - Alterar o makefile
+ * - Testar com todos os componentes
+ * - Alterar fileHandler
+ * - Implementar FFT
+ * - Implementar GNU Plot
+ * - EXTRA: Usar gtk+ pra fazer a GUI
  * Este código implementa um sistema de aquisição de dados. Ele utiliza
  * dois sensores MPU-6050, um em cada meia asa, um sensor MPU-9250, no
  * centro da aeronave, um GPS também no centro da aeronave, um botão
@@ -59,7 +66,7 @@
   #include <wiringPiI2C.h>
 #endif
 
-#ifned _RTIMULIB_H
+#ifndef _RTIMULIB_H
   #include "RTIMULib.h"
 #endif
 
@@ -85,13 +92,6 @@
 // =======================================================================
 // typedef das structs que armazenarão os dados
 // =======================================================================
-  typedef struct imuDataAngulo{
-  	// Dados da Fusão dos Dados
-  	double roll;
-  	double pitch;
-  	double yaw;
-  }imuDataAngulo;
-
   typedef struct bend{
     double meiaAsaDireita;
     double meiaAsaEsquerda;
@@ -122,9 +122,6 @@
 // Variáveis Globais
 // =======================================================================
   // volatile é utilizado para evitar otimizações excessivas do compilador
-  // imu_struct[0] e imu_struct[1] são para MPU-6050
-  // imu_struct[2] para MPU-9250
-  volatile imuDataAngulo imu_struct[2];
   // struct para TODOS os dados da aeronave
   volatile aeronave uav;
   // struct para uso do sinal de interrupção
@@ -157,11 +154,22 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
 
       // Encerramento do fileHandler
       pthread_cancel(fileHandler);
-      pthread_mutex_destroy(&mutexLock);
 
       // Encerramento dos processamentos
       pthread_cancel(processamentoDireita);
       pthread_cancel(processamentoEsquerda);
+
+      // Destruindo chave mutex
+      pthread_mutex_destroy(&mutexLock);
+      // Toque do buzzer
+      buzzerTone('B',200);
+      buzzerTone('B',200);
+      buzzerTone('A',100);
+      buzzerTone('B',200);
+      buzzerTone('E',200);
+      buzzerTone('D',200);
+      buzzerTone('D',50);
+      buzzerTone('X',100);
       exit(EXIT_SUCCESS);
       break;
     case SIGUSR1:
@@ -184,19 +192,41 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
 // thread para processamento dos dados na struct
 // =======================================================================
 void* procDadosDir(void* unused){
-  // Calculo do ângulo de Flexão
-  uav.anguloDeFlexao.meiaAsaDireita = copysign((imu_struct[0].pitch - std::abs(imu_struct[2].pitch)), imu_struct[0].pitch);
-  // Calculo do ângulo de Torção
-  uav.anguloDeTorcao.meiaAsaDireita = copysign((imu_struct[0].roll - std::abs(imu_struct[2].roll)), imu_struct[0].roll);
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
+  imu_struct = (imuDataAngulo *) unused;
+
+  double pitch0 = imu_struct->pitch;
+  double roll0 = imu_struct->roll;
+
+  imu_struct++;
+  imu_struct++;
+
+  double pitch2 = imu_struct->pitch;
+  double roll2 = imu_struct->roll;
+
+  uav.anguloDeFlexao.meiaAsaDireita = copysign((pitch0 - std::abs(pitch2)), pitch0);
+  uav.anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
 
   return NULL;
-} // FIM DA THREAD procDadosDir
+} // FIM DA THREAD procDadosEsqDir
 
 void* procDadosEsq(void* unused){
-  // Calculo do ângulo de Flexão
-  uav.anguloDeFlexao.meiaAsaEsquerda = copysign((imu_struct[1].pitch - std::abs(imu_struct[2].pitch)), imu_struct[1].pitch);
-  // Calculo do ângulo de Torção
-  uav.anguloDeTorcao.meiaAsaEsquerda = copysign((imu_struct[1].roll - std::abs(imu_struct[2].roll)), imu_struct[1].roll);
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
+  imu_struct = (imuDataAngulo *) unused;
+
+  imu_struct++;
+
+  double pitch1 = imu_struct->pitch;
+  double roll1 = imu_struct->roll;
+
+  imu_struct++;
+  double pitch2 = imu_struct->pitch;
+  double roll2 = imu_struct->roll;
+
+  uav.anguloDeFlexao.meiaAsaEsquerda = copysign((pitch1 - std::abs(pitch2)), pitch1);
+  uav.anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
 
   return NULL;
 } // FIM DA THREAD procDadosEsq
@@ -232,9 +262,22 @@ void* fileHandler(void* dados){
 		// MUTEX e armazena os dados no arquivo
 		pthread_mutex_lock(&mutexLock);
 
-		fputs("%f\t\t%f\t\t%f\t\t%f" uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
-		fputs("\t\t%f\t\t%f\t\t%f", imu_struct[2].roll, imu_struct[2].pitch, imu_struct[2].yaw);
-		// fputs("\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ);
+    // Apresentação dos dados no terminal
+    system("clear");
+    fprintf(stderr, "Latitude: %f deg\n", dataGPS->fix.latitude);
+    fprintf(stderr, "Longitude: %f deg\n", dataGPS->fix.longitude);
+    fprintf(stderr, "Altitude: %f m\n", dataGPS->fix.altitude);
+    fprintf(stderr, "Velocidade Horizontal: %f m/s\n", dataGPS->fix.speed);
+    fprintf(stderr, "Velocidade de Subida: %f m/s\n", dataGPS->fix.climb);
+    fprintf(stderr, "Marca-passo: %f segundos\n\n", dataGPS->fix.time);
+    fprintf(stderr, "Torcao meia asa Direita: %f\n", uav.anguloDeTorcao.meiaAsaDireita);
+    fprintf(stderr, "Torcao meia asa Esquerda: %f\n\n", uav.anguloDeTorcao.meiaAsaEsquerda);
+    fprintf(stderr, "Flexao meia asa Direita: %f\n", uav.anguloDeFlexao.meiaAsaDireita);
+    fprintf(stderr, "Flexao meia asa Esquerda: %f\n", uav.anguloDeFlexao.meiaAsaEsquerda);
+
+		fputs("%f\t\t%f\t\t%f\t\t%f\n" uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
+		fputs("\t\t%f\t\t%f\t\t%f\n", imu_struct[2].roll, imu_struct[2].pitch, imu_struct[2].yaw);
+		/* fputs("\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
 		fputs("\n");
 
 		pthread_mutex_unlock(&mutexLock);
@@ -259,15 +302,6 @@ void* threadGPS(void* param){
     usleep(750000); // A cada 3/4 de segundo, verifica GPS
     pthread_mutex_lock(&mutexLock);
     leituraGPS(dataGPS);
-
-    system("clear");
-    fprintf(stderr, "Latitude: %f deg\n", dataGPS->fix.latitude);
-    fprintf(stderr, "Longitude: %f deg\n", dataGPS->fix.longitude);
-    fprintf(stderr, "Altitude: %f m\n", dataGPS->fix.altitude);
-    fprintf(stderr, "Velocidade Horizontal: %f m/s\n", dataGPS->fix.speed);
-    fprintf(stderr, "Velocidade de Subida: %f m/s\n", dataGPS->fix.climb);
-    fprintf(stderr, "Marca-passo: %f segundos\n", dataGPS->fix.time);
-
     /* Se foi recebido um 3D FIX, envia SIGUSR1 para a thread principal.
      * Como todas as threads possuem o mesmo pid (retornado por getpid)
      * Podemos utilizar a chamada getpid() que qualquer thread que receber
@@ -295,6 +329,11 @@ int main (){
 
 	// Variável para contar o IMU a ser lido/processado para manter a ordem
 	int contadorIMU = 0;
+
+  // imu_struct [0] e imu_struct++ [1] são para MPU-6050
+  // imu_struct ++ ++ [2] para MPU-9250
+  imuDataAngulo* imu_struct;
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
 
   // set das flags para o sinal de interrupção SIGINT = ctrl + c
   act.sa_sigaction = trataSinal;
@@ -331,23 +370,23 @@ int main (){
 
 	// Loop infinito
 	while(/*digitalRead(CONTROL_BUTTON_PIN)*/1){
-		contadorIMU = 0;
-
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
 		// =======================================================================
 		for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
-			leituraIMU(contadorIMU, sampleCount, sampleRate, rateTimer, displayTimer, now);
+			leituraIMU(imu[contadorIMU], imu_struct);
+      imu_struct ++;
 		}
+    imu_struct -= 2;
 
 		// =======================================================================
 		// thread para processamento dos dados na struct
 		// =======================================================================
-		if( pthread_create (&processamentoDireita, NULL, &procDadosDir, NULL) != 0){
+		if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct) != 0){
 			fprintf(stderr, "Erro na inicialização da thread procDadosDir na linha # %d\n", __LINE__);
 			exit(EXIT_FAILURE);
 		}
-		if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, NULL) != 0){
+		if( pthread_create (&processamentoEsquerda, NULL, &procDadosEsq, (void*) imu_struct) != 0){
 			fprintf(stderr, "Erro na inicialização da thread procDadosEsq na linha # %d\n", __LINE__);
 			exit(EXIT_FAILURE);
 		}
@@ -366,12 +405,11 @@ int main (){
 		pthread_join(threadFileHandler, NULL);
 
 	} // FIM DO LOOP INFINITO
-	pthread_mutex_destroy(&mutexLock);
-  pthread_cancel(threadGPS);
 
 	// =======================================================================
 	// Pós-processamento dos dados (FFT) e plot dos gráficos
 	// =======================================================================
 
-	exit(EXIT_SUCCESS);
+  // Ao final de tudo, a própria main executa o SIGINT
+	sigqueue(getpid(),SIGINT,NULL);
 } // FIM DA FUNÇÃO MAIN
