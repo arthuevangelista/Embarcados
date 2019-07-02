@@ -4,14 +4,14 @@
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.6
+ * Versão: rev 3.7
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
  * Código open-source
  * =======================================================================
  * Falta:
- * - Alterar o makefile
+ * - Alterar lib IMU p/ auto config
  * - Testar com todos os componentes
  * - Alterar fileHandler
  * - Implementar FFT
@@ -84,6 +84,7 @@
 
 // Pinos utilizados
 #define CONTROL_BUTTON_PIN 20
+#define ADDR_PIN 18
 
 #ifndef BUZZER_PIN
   #define BUZZER_PIN 7
@@ -128,8 +129,9 @@
   struct sigaction act;
   // Variável global para uso do GPSD
   gps_data_t* dataGPS;
-  // Chave mutex para armazenamento dos dados
+  // Chaves mutex para armazenamento dos dados
   static pthread_mutex_t mutexLock;
+  static pthread_mutex_t mutexUAV;
   // Declaração das threads a serem usadas
   pthread_t threadGPS;
   pthread_t processamentoDireita;
@@ -145,12 +147,6 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
       system("clear");
       fprintf(stderr, "Recebido o sinal de interrupção [%d].\n", signum);
       printf("\n%s\n", "Teste realizado com sucesso!");
-      sleep(3);
-
-      // Encerramento do GPS
-      killGPS(dataGPS);
-      free(dataGPS);
-      pthread_cancel(threadGPS);
 
       // Encerramento do fileHandler
       pthread_cancel(fileHandler);
@@ -159,22 +155,30 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
       pthread_cancel(processamentoDireita);
       pthread_cancel(processamentoEsquerda);
 
+      // Encerramento do GPS
+      pthread_cancel(threadGPS);
+      killGPS(dataGPS);
+      free(dataGPS);
+
       // Destruindo chave mutex
       pthread_mutex_destroy(&mutexLock);
+      pthread_mutex_destroy(&mutexUAV);
       // Toque do buzzer
-      buzzerTone('B',200);
-      buzzerTone('B',200);
+      buzzerTone('B',100);
       buzzerTone('A',100);
-      buzzerTone('B',200);
-      buzzerTone('E',200);
-      buzzerTone('D',200);
-      buzzerTone('D',50);
+      buzzerTone('G',100);
+      buzzerTone('F',100);
+      buzzerTone('E',100);
+      buzzerTone('D',100);
+      buzzerTone('C',200);
       buzzerTone('X',100);
+      sleep(1);
       exit(EXIT_SUCCESS);
       break;
     case SIGUSR1:
       // Salva os dados do dataGPS->fix.etc no uav para fusão
       pthread_mutex_lock(&mutexLock);
+      pthread_mutex_lock(&mutexUAV);
       uav.latitude = dataGPS->fix.latitude;
       uav.longitude = dataGPS->fix.longitude;
       uav.altitude = dataGPS->fix.altitude;
@@ -182,6 +186,7 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
       uav.velSubida = dataGPS->fix.climb;
       uav.timestamp = dataGPS->fix.time;
       pthread_mutex_unlock(&mutexLock);
+      pthread_mutex_unlock(&mutexUAV);
       break;
     default:
     break;
@@ -205,9 +210,12 @@ void* procDadosDir(void* unused){
   double pitch2 = imu_struct->pitch;
   double roll2 = imu_struct->roll;
 
+  pthread_mutex_lock(&mutexUAV);
   uav.anguloDeFlexao.meiaAsaDireita = copysign((pitch0 - std::abs(pitch2)), pitch0);
   uav.anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
+  pthread_mutex_unlock(&mutexUAV);
 
+  free(imu_struct);
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
 
@@ -225,9 +233,12 @@ void* procDadosEsq(void* unused){
   double pitch2 = imu_struct->pitch;
   double roll2 = imu_struct->roll;
 
+  pthread_mutex_lock(&mutexUAV);
   uav.anguloDeFlexao.meiaAsaEsquerda = copysign((pitch1 - std::abs(pitch2)), pitch1);
   uav.anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
+  pthread_mutex_unlock(&mutexUAV);
 
+  free(imu_struct);
   return NULL;
 } // FIM DA THREAD procDadosEsq
 
@@ -260,16 +271,16 @@ void* fileHandler(void* dados){
 	}else{
 		// Caso tenha sido possível realizar a abertura do arquivo, locka a chave
 		// MUTEX e armazena os dados no arquivo
-		pthread_mutex_lock(&mutexLock);
+		pthread_mutex_lock(&mutexUAV);
 
     // Apresentação dos dados no terminal
     system("clear");
-    fprintf(stderr, "Latitude: %f deg\n", dataGPS->fix.latitude);
-    fprintf(stderr, "Longitude: %f deg\n", dataGPS->fix.longitude);
-    fprintf(stderr, "Altitude: %f m\n", dataGPS->fix.altitude);
-    fprintf(stderr, "Velocidade Horizontal: %f m/s\n", dataGPS->fix.speed);
-    fprintf(stderr, "Velocidade de Subida: %f m/s\n", dataGPS->fix.climb);
-    fprintf(stderr, "Marca-passo: %f segundos\n\n", dataGPS->fix.time);
+    fprintf(stderr, "Latitude: %f deg\n", uav.latitude);
+    fprintf(stderr, "Longitude: %f deg\n", uav.longitude);
+    fprintf(stderr, "Altitude: %f m\n", uav.altitude);
+    fprintf(stderr, "Velocidade Horizontal: %f m/s\n", uav.velTerrest);
+    fprintf(stderr, "Velocidade de Subida: %f m/s\n", uav.velSubida);
+    fprintf(stderr, "Marca-passo: %f segundos\n\n", uav.timestamp);
     fprintf(stderr, "Torcao meia asa Direita: %f\n", uav.anguloDeTorcao.meiaAsaDireita);
     fprintf(stderr, "Torcao meia asa Esquerda: %f\n\n", uav.anguloDeTorcao.meiaAsaEsquerda);
     fprintf(stderr, "Flexao meia asa Direita: %f\n", uav.anguloDeFlexao.meiaAsaDireita);
@@ -280,7 +291,7 @@ void* fileHandler(void* dados){
 		/* fputs("\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
 		fputs("\n");
 
-		pthread_mutex_unlock(&mutexLock);
+		pthread_mutex_unlock(&mutexUAV);
 	} // FIM DA CONDICIONAL IF-ELSE
 	fclose(fp);
 	return NULL;
@@ -299,7 +310,7 @@ void* threadGPS(void* param){
   initGPS(dataGPS);
 
   while (1) {
-    usleep(750000); // A cada 3/4 de segundo, verifica GPS
+    usleep(500000); // A cada 1/2 de segundo (2 Hz), verifica GPS
     pthread_mutex_lock(&mutexLock);
     leituraGPS(dataGPS);
     /* Se foi recebido um 3D FIX, envia SIGUSR1 para a thread principal.
@@ -350,6 +361,8 @@ int main (){
 
   // Botão de controle do loop infinito
 	pinMode(CONTROL_BUTTON_PIN, INPUT);
+  pinMode(ADDR_PIN, OUTPUT);
+  digitalWrite(ADDR_PIN, HIGH);
 
 // =======================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU

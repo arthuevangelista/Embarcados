@@ -28,8 +28,8 @@ void initGPS(gps_data_t* dataGPS){
   system("sudo gpsd -n /dev/ttyS0 -F /var/run/gpsd.sock");
 
   sleep(2); // Aguarda por 2 segundos
-  buzzerTone('F',600);
   buzzerTone('D',300);
+  buzzerTone('F',600);
   buzzerTone('X',100);
 
   if((rc = gps_open(GPSD_SHARED_MEMORY, NULL, dataGPS)) == -1){
