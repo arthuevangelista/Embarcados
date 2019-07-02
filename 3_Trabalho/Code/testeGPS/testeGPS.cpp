@@ -44,6 +44,14 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
   sleep(3);
   killGPS(dataGPS);
   free(dataGPS);
+  buzzerTone('B',600);
+  buzzerTone('B',600);
+  buzzerTone('A',300);
+  buzzerTone('B',300);
+  buzzerTone('E',600);
+  buzzerTone('D',600);
+  buzzerTone('D',200);
+  buzzerTone('X',100);
   exit(EXIT_SUCCESS);
 }
 
@@ -68,22 +76,22 @@ int main(){
   initGPS(dataGPS);
 
   while(1){
-        leituraGPS(dataGPS);
+    leituraGPS(dataGPS);
 
-        df.latitude = dataGPS->fix.latitude;
-        df.longitude = dataGPS->fix.longitude;
-        df.altitude = dataGPS->fix.altitude;
-        df.velTerrest = dataGPS->fix.speed;
-        df.velSubida = dataGPS->fix.climb;
-        df.timestamp = dataGPS->fix.time;
+    df.latitude = dataGPS->fix.latitude;
+    df.longitude = dataGPS->fix.longitude;
+    df.altitude = dataGPS->fix.altitude;
+    df.velTerrest = dataGPS->fix.speed;
+    df.velSubida = dataGPS->fix.climb;
+    df.timestamp = dataGPS->fix.time;
 
-        system("clear");
+    system("clear");
 
-        fprintf(stderr, "Latitude: %f deg\n", df.latitude);
-        fprintf(stderr, "Longitude: %f deg\n", df.longitude);
-        fprintf(stderr, "Altitude: %f m\n", df.altitude);
-        fprintf(stderr, "Velocidade Horizontal: %f m/s\n", df.velTerrest);
-        fprintf(stderr, "Velocidade de Subida: %f m/s\n", df.velSubida);
-        fprintf(stderr, "Marca-passo: %f segundos\n", df.timestamp);
+    fprintf(stderr, "Latitude: %f deg\n", df.latitude);
+    fprintf(stderr, "Longitude: %f deg\n", df.longitude);
+    fprintf(stderr, "Altitude: %f m\n", df.altitude);
+    fprintf(stderr, "Velocidade Horizontal: %f m/s\n", df.velTerrest);
+    fprintf(stderr, "Velocidade de Subida: %f m/s\n", df.velSubida);
+    fprintf(stderr, "Marca-passo: %f segundos\n", df.timestamp);
   } // FIM DO WHILE
 } // FIM DA MAIN

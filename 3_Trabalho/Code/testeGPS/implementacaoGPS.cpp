@@ -51,8 +51,6 @@ void leituraGPS(gps_data_t* dataGPS){
               (dataGPS->fix.mode == MODE_2D || dataGPS->fix.mode == MODE_3D) &&
               !isnan(dataGPS->fix.latitude) &&
               !isnan(dataGPS->fix.longitude)) {
-                  // Print para fins de testes. Esta linha deve ser comentada!
-                  //fprintf(stderr, "\nLatitude: %f\nLongitude: %f\nVelocidade: %f\nMarca de Tempo: %lf\n", (*dataGPS)->fix.latitude, (*dataGPS)->fix.longitude, (*dataGPS)->fix.speed, (*dataGPS)->fix.time);
           }else{
               printf("Sem dados do GPS disponíveis!\n");
           }
