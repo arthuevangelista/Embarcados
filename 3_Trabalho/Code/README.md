@@ -1,5 +1,11 @@
-Compilando da seguinte maneira (por enquanto):
+# Compilado utilizando makefile!
 
-  g++ main.cpp -o main -lwiringPi -lpthread -lm -lgps
+- Para instalar:
+
+  'make -j4'
+  'sudo make install'
   
-Para ultima iteração do projeto será construído um makefile decente.
+- Para desinstalar:
+
+  'sudo make uninstall'
+  'sudo make clean'
