@@ -21,15 +21,15 @@ void initGPS(gps_data_t* dataGPS){
 
   // Sys calls para configuração do gpsd como GPSD_SHARED_MEMORY
   system("sudo systemctl stop serial-getty@ttyS0.service");
-  system("sudo systemctl disabel serial-getty@ttyS0.service");
+  system("sudo systemctl disable serial-getty@ttyS0.service");
   system("sudo systemctl stop gpsd.socket");
   system("sudo systemctl disable gpsd.socket");
   system("sudo killall gpsd");
   system("sudo gpsd -n /dev/ttyS0 -F /var/run/gpsd.sock");
 
   sleep(2); // Aguarda por 2 segundos
-  buzzerTone('F',200);
-  buzzerTone('D',100);
+  buzzerTone('F',600);
+  buzzerTone('D',300);
   buzzerTone('X',100);
 
   if((rc = gps_open(GPSD_SHARED_MEMORY, NULL, dataGPS)) == -1){

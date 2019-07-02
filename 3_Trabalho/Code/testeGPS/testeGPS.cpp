@@ -44,11 +44,11 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
   sleep(3);
   killGPS(dataGPS);
   free(dataGPS);
-  return EXIT_SUCCESS;
+  exit(EXIT_SUCCESS);
 }
 
 // main
-void main(){
+int main(){
   int i = 0;
 
   dadosFusao df;
