@@ -27,7 +27,7 @@ all: $(PROG)
 
 $(PROG): $(OBJS)
 	@echo "Compilando aplicativos de teste de GPS ..."
-	@$(CXX) $(CFLAGS) $(OBJS) -o $@ $(LOCALLIBDIR) $(LDLIBS)
+	@$(CXX) -g $(CFLAGS) $(OBJS) -o $@ $(LOCALLIBDIR) $(LDLIBS)
 
 testeGPS.o: implementacaoGPS.h
 implementacaoGPS.o: implementacaoGPS.h

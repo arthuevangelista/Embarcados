@@ -18,7 +18,8 @@ void initGPS(gps_data_t* dataGPS){
   int rc;
 
   printf("Inicializando GPS ...\n");
-  if((rc = gps_open(GPSD_SHARED_MEMORY, 0, dataGPS)) == -1){
+  system("");
+  if((rc = gps_open(GPSD_SHARED_MEMORY, NULL, dataGPS)) == -1){
     printf("Erro na inicialização do GPS na linha # %d\nRazão do erro: %s\n", __LINE__, gps_errstr(rc));
     exit(EXIT_FAILURE);
   }
