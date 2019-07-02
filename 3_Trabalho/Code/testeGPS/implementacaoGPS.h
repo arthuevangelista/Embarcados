@@ -41,6 +41,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifndef	__WIRING_PI_H__
+  #include <wiringPi.h>
+#endif
+
+#ifndef _BUZZER_H_
+  #include "buzzer.h"
+#endif
+
+#ifndef BUZZER_PIN
+  #define BUZZER_PIN 7
+#endif
+
 void initGPS(gps_data_t* dataGPS);
 
 void leituraGPS(gps_data_t* dataGPS);

@@ -1,10 +1,25 @@
-// g++ -c -o teste testeGPS.cpp -lm -lgps
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 
-#include "implementacaoGPS.h"
+#ifndef _IMPLEMENTACAOGPS_H_
+  #include "implementacaoGPS.h"
+#endif
+
+#ifndef	__WIRING_PI_H__
+  #include <wiringPi.h>
+#endif
+
+#ifndef _BUZZER_H_
+  #include "buzzer.h"
+#endif
+
+#ifndef BUZZER_PIN
+  #define BUZZER_PIN 7
+#endif
+
+struct sigaction act;
 
 typedef struct dadosFusao{
   // Todos dados da struct tem retorno de erro tbm
@@ -16,16 +31,43 @@ typedef struct dadosFusao{
   float timestamp; // segundos
 }dadosFusao;
 
-int main(){
+// Variável global para uso do GPSD
+gps_data_t* dataGPS;
+
+// Sub-rotina para tratamento do sinal de kill
+void trataSinal(int signum, siginfo_t* info, void* ptr){
+  system("clear");
+  fprintf(stderr, "Recebido o sinal %d.\n", signum);
+  fprintf(stderr, "\nPressione qualquer tecla para continuar... ");
+  getchar();
+  printf("\n%s\n", "Teste realizado com sucesso!");
+  sleep(3);
+  killGPS(dataGPS);
+  free(dataGPS);
+  return EXIT_SUCCESS;
+}
+
+// main
+void main(){
   int i = 0;
 
-dadosFusao df;
+  dadosFusao df;
 
-  gps_data_t* dataGPS;
+  // set das flags para o sinal de interrupção SIGINT = ctrl + c
+  act.sa_sigaction = trataSinal;
+  act.sa_flags = SA_SIGINFO; // info sobre o sinal
+
+  // Direcionamento para o devido tratamento dos sinais
+  sigaction(SIGINT, &act, NULL);
+
+  wiringPiSetup();
+  buzzerInit();
+
+  // Aloca na main, desloca no sigaction
   dataGPS = (gps_data_t*)malloc(sizeof(gps_data_t));
   initGPS(dataGPS);
 
-  while(i <= 10){
+  while(1){
         leituraGPS(dataGPS);
 
         df.latitude = dataGPS->fix.latitude;
@@ -35,21 +77,13 @@ dadosFusao df;
         df.velSubida = dataGPS->fix.climb;
         df.timestamp = dataGPS->fix.time;
 
-        printf("\n");
+        system("clear");
 
-        fprintf(stderr, "%f\n", df.latitude);
-        // fprintf(stderr, "%f\n", df.longitude);
-        // fprintf(stderr, "%f\n", df.altitude);
-        // fprintf(stderr, "%f\n", df.velTerrest);
-        // fprintf(stderr, "%f\n", df.velSubida);
-        // fprintf(stderr, "%f\n", df.timestamp);
-
-        i++;
+        fprintf(stderr, "Latitude: %f deg\n", df.latitude);
+        fprintf(stderr, "Longitude: %f deg\n", df.longitude);
+        fprintf(stderr, "Altitude: %f m\n", df.altitude);
+        fprintf(stderr, "Velocidade Horizontal: %f m/s\n", df.velTerrest);
+        fprintf(stderr, "Velocidade de Subida: %f m/s\n", df.velSubida);
+        fprintf(stderr, "Marca-passo: %f segundos\n", df.timestamp);
   } // FIM DO WHILE
-      printf("%s\n", "Teste realizado com sucesso!");
-      sleep(3);
-
-    killGPS(dataGPS);
-
-    return EXIT_SUCCESS;
 } // FIM DA MAIN

@@ -11,10 +11,10 @@ CFLAGS = -Wall
 INCPATH = -I.
 
 # Flags necessarias para o GPS
-LDLIBS = -lm -lgps
+LDLIBS = -lm -lgps -lpthread -lwiringPi
 
 # Listagem dos Objetos
-OBJS = testeGPS.o implementacaoGPS.o
+OBJS = testeGPS.o implementacaoGPS.o buzzer.o
 
 # Usado para o link
 LOCALLIBDIR = -L/usr/lib/arm-linux-gnueabihf
@@ -31,6 +31,7 @@ $(PROG): $(OBJS)
 
 testeGPS.o: implementacaoGPS.h
 implementacaoGPS.o: implementacaoGPS.h
+buzzer.o: buzzer.h
 
 clean:
 	@echo "Deletando binários ..."

@@ -18,7 +18,20 @@ void initGPS(gps_data_t* dataGPS){
   int rc;
 
   printf("Inicializando GPS ...\n");
-  system("");
+
+  // Sys calls para configuração do gpsd como GPSD_SHARED_MEMORY
+  system("sudo systemctl stop serial-getty@ttyS0.service");
+  system("sudo systemctl disabel serial-getty@ttyS0.service");
+  system("sudo systemctl stop gpsd.socket");
+  system("sudo systemctl disable gpsd.socket");
+  system("sudo killall gpsd");
+  system("sudo gpsd -n /dev/ttyS0 -F /var/run/gpsd.sock");
+
+  sleep(2); // Aguarda por 2 segundos
+  buzzerTone('F',200);
+  buzzerTone('D',100);
+  buzzerTone('X',100);
+
   if((rc = gps_open(GPSD_SHARED_MEMORY, NULL, dataGPS)) == -1){
     printf("Erro na inicialização do GPS na linha # %d\nRazão do erro: %s\n", __LINE__, gps_errstr(rc));
     exit(EXIT_FAILURE);
@@ -30,6 +43,7 @@ void initGPS(gps_data_t* dataGPS){
 // =======================================================================
 void leituraGPS(gps_data_t* dataGPS){
   int rc = 0;
+  sleep(1);
       if (rc = gps_read(dataGPS) == -1) {
           printf("Erro ao realizar a leitura do GPS na linha # %d. Código do erro: %s\n",__LINE__, gps_errstr(rc));
       }else{
