@@ -1,17 +1,16 @@
-/* =======================================================================
+/* =====================================================================
  * SISTEMA DE AQUISIÇÃO DE DADOS
- * =======================================================================
+ * =====================================================================
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.7
+ * Versão: rev 3.8
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
  * Código open-source
- * =======================================================================
+ * =====================================================================
  * Falta:
- * - Alterar lib IMU p/ auto config
  * - Testar com todos os componentes
  * - Alterar fileHandler
  * - Implementar FFT
@@ -37,18 +36,18 @@
  * sudo make install
  * sudo finalPROG
  *
- * =======================================================================
- * Para rápida referência, as structs estão enumeradas da seguinte forma:
+ * =====================================================================
+ * Para rápida referência, as structs são enumeradas da seguinte forma:
  *
  * meiaAsaDireita = imu_struct[0]
  * meiaAsaEsquerda = imu_struct[1]
  * Aviao = imu_struct[2]
- * =======================================================================
+ * =====================================================================
  */
 
-// =======================================================================
+// =====================================================================
 // INICIALICAÇÃO DAS BIBLIOTECAS EM COMUM
-// =======================================================================
+// =====================================================================
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -78,9 +77,9 @@
   #include "buzzer.h"
 #endif
 
-// =======================================================================
+// =====================================================================
 // define das constantes
-// =======================================================================
+// =====================================================================
 
 // Pinos utilizados
 #define CONTROL_BUTTON_PIN 20
@@ -90,9 +89,9 @@
   #define BUZZER_PIN 7
 #endif
 
-// =======================================================================
+// =====================================================================
 // typedef das structs que armazenarão os dados
-// =======================================================================
+// =====================================================================
   typedef struct bend{
     double meiaAsaDireita;
     double meiaAsaEsquerda;
@@ -122,10 +121,10 @@
     float timestamp; // segundos
   }aeronave;
 
-// =======================================================================
+// =====================================================================
 // Variáveis Globais
-// =======================================================================
-  // volatile é utilizado para evitar otimizações excessivas do compilador
+// =====================================================================
+  // volatile é utilizado para evitar otimizações do compilador
   // struct para TODOS os dados da aeronave
   volatile aeronave uav;
   // struct para uso do sinal de interrupção
@@ -142,9 +141,9 @@
   pthread_t processamentoEsquerda;
   pthread_t threadFileHandler;
 
-// =======================================================================
+// =====================================================================
 // Sub-rotina para tratamento do sinal de interrupção
-// =======================================================================
+// =====================================================================
 void trataSinal(int signum, siginfo_t* info, void* ptr){
   switch (signum) {
     case SIGINT:
@@ -197,9 +196,9 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
   } // FIM DO SWITCH-CASE
 } // FIM DA SUBROTINA trataSinal
 
-// =======================================================================
+// =====================================================================
 // thread para processamento dos dados na struct
-// =======================================================================
+// =====================================================================
 void* procDadosDir(void* unused){
   imuDataAngulo* imu_struct;
   imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
@@ -246,9 +245,9 @@ void* procDadosEsq(void* unused){
   return NULL;
 } // FIM DA THREAD procDadosEsq
 
-// =======================================================================
+// =====================================================================
 // thread para armazenamento dos dados
-// =======================================================================
+// =====================================================================
 void* fileHandler(void* dados){
 	/* Sub-rotina dedicada a apenas armazenar o valor enviado para thread
 	* em um arquivo. A chave MUTEX será utilizada para que:
@@ -304,9 +303,9 @@ void* fileHandler(void* dados){
 	return NULL;
 } // FIM DA THREAD fileHandler
 
-// =======================================================================
+// =====================================================================
 // Função de inicialização do GPS
-// =======================================================================
+// =====================================================================
 void* threadGPS(void* param){
   /* Nesta thread, quando o GPS receber um 3D FIX, os dados irão ser
    * utilizados para a Fusão dos dados com a unidade IMU no centro da
@@ -338,9 +337,9 @@ void* threadGPS(void* param){
 
 } //	FIM DA THREAD threadGPS
 
-// =======================================================================
+// =====================================================================
 // Função principal main
-// =======================================================================
+// =====================================================================
 int main (){
   // Ponteiro para classe imu
 	RTIMU *imu[2];
@@ -371,18 +370,18 @@ int main (){
   pinMode(ADDR_PIN, OUTPUT);
   digitalWrite(ADDR_PIN, HIGH);
 
-// =======================================================================
+// =====================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU
-// =======================================================================
+// =====================================================================
   for (contadorIMU = 0; contadorIMU <= 2; contadorIMU++) {
 		// Aqui cabe uma otimização fazendo initIMU(contadorIMU, imu)
 		// e alterando a implementação do IMU
   	imu[contadorIMU] = initIMU(contadorIMU);
   }
 
-// =======================================================================
+// =====================================================================
 // INICIALIZAÇÃO DO GPS
-// =======================================================================
+// =====================================================================
   if(pthread_create(&pthreadGPS, NULL, &threadGPS, NULL) != 0){
     fprintf(stderr, "Erro na inicialização da thread do GPS na linha # %d\n", __LINE__);
     exit(EXIT_FAILURE);
