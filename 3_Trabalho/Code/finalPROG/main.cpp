@@ -12,9 +12,20 @@
  * =====================================================================
  * Falta:
  * - Testar com todos os componentes
- * - Alterar fileHandler
- * - Implementar FFT
+ * - Implementar FFT:
+ *    - Precisa do timestamp (GPS) e do usecs since last epoch (IMU);
+ * - Alterar fileHandler:
+ *    - Separar cada dado a ser FFTado e plotado em um arquivo separado?
+ *       - Tamanho do arquivo é o tamanho do vetor => EOF = fim do vetor
+ *       - while(feof(file_pointer)){ length++ } malloc(sizeof()*length)
+ *    - Inicializar a tabela na main para a thread apenas add os dados
+ *    - Primeira linha deve conter as definições de cada coluna
  * - Implementar GNU Plot
+ *    - Plottar FFT
+ *    - Plottar PSD (power spectral density = fft/freq)
+ *    - Plottar Espectograma (FFT pelo tempo)
+ *    - Plottar trajetória 2D (precisa de kalman)
+ *    - Plottar trajetória 3D (kalman)
  * - EXTRA: Usar gtk+ pra fazer a GUI
  * Este código implementa um sistema de aquisição de dados. Ele utiliza
  * dois sensores MPU-6050, um em cada meia asa, um sensor MPU-9250, no
@@ -107,8 +118,8 @@
     bend anguloDeFlexao;
     torsion anguloDeTorcao;
     // Dados desempenho
-    float atitude;
     float alpha;
+    float atitude;
     float roll;
     float pitch;
     float yaw;
@@ -263,7 +274,7 @@ void* fileHandler(void* dados){
 
 	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
 	char buffer[50];
-	snprintf(buffer, sizeof(char)*50, "home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s_%s.txt", __DATE__, __TIME__);
+	snprintf(buffer, sizeof(char)*50, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s_%s.txt", __DATE__, __TIME__);
 
 	FILE *fp = fopen(buffer, "a");
 
