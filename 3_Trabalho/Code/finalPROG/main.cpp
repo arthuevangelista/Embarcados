@@ -110,6 +110,9 @@
     // Dados desempenho
     float atitude;
     float alpha;
+    float roll;
+    float pitch;
+    float yaw;
     // Dados do GPS
     float latitude; // graus
     float longitude; // graus
@@ -127,13 +130,14 @@
   volatile aeronave uav;
   // struct para uso do sinal de interrupção
   struct sigaction act;
+  union sigval value;
   // Variável global para uso do GPSD
   gps_data_t* dataGPS;
   // Chaves mutex para armazenamento dos dados
   static pthread_mutex_t mutexLock;
   static pthread_mutex_t mutexUAV;
   // Declaração das threads a serem usadas
-  pthread_t threadGPS;
+  pthread_t pthreadGPS;
   pthread_t processamentoDireita;
   pthread_t processamentoEsquerda;
   pthread_t threadFileHandler;
@@ -149,14 +153,14 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
       printf("\n%s\n", "Teste realizado com sucesso!");
 
       // Encerramento do fileHandler
-      pthread_cancel(fileHandler);
+      pthread_cancel(threadFileHandler);
 
       // Encerramento dos processamentos
       pthread_cancel(processamentoDireita);
       pthread_cancel(processamentoEsquerda);
 
       // Encerramento do GPS
-      pthread_cancel(threadGPS);
+      pthread_cancel(pthreadGPS);
       killGPS(dataGPS);
       free(dataGPS);
 
@@ -256,7 +260,7 @@ void* fileHandler(void* dados){
 	*
 	* Em outras palavras, utilizaremos a chave MUTEX para evitar as condições
 	* de corrida crítica citadas acima.
-  */
+        */
 
 	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
 	char buffer[50];
@@ -281,15 +285,18 @@ void* fileHandler(void* dados){
     fprintf(stderr, "Velocidade Horizontal: %f m/s\n", uav.velTerrest);
     fprintf(stderr, "Velocidade de Subida: %f m/s\n", uav.velSubida);
     fprintf(stderr, "Marca-passo: %f segundos\n\n", uav.timestamp);
+    fprintf(stderr, "Roll: %f deg\n", uav.roll);
+    fprintf(stderr, "Pitch: %f deg\n", uav.pitch);
+    fprintf(stderr, "Yaw: %f deg\n\n", uav.yaw);
     fprintf(stderr, "Torcao meia asa Direita: %f\n", uav.anguloDeTorcao.meiaAsaDireita);
     fprintf(stderr, "Torcao meia asa Esquerda: %f\n\n", uav.anguloDeTorcao.meiaAsaEsquerda);
     fprintf(stderr, "Flexao meia asa Direita: %f\n", uav.anguloDeFlexao.meiaAsaDireita);
     fprintf(stderr, "Flexao meia asa Esquerda: %f\n", uav.anguloDeFlexao.meiaAsaEsquerda);
 
-		fputs("%f\t\t%f\t\t%f\t\t%f\n" uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
-		fputs("\t\t%f\t\t%f\t\t%f\n", imu_struct[2].roll, imu_struct[2].pitch, imu_struct[2].yaw);
-		/* fputs("\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
-		fputs("\n");
+		fprintf(fp, "%f\t\t%f\t\t%f\t\t%f", uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
+		fprintf(fp, "\t\t%f\t\t%f\t\t%f\n", uav.roll, uav.pitch, uav.yaw);
+		/* fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
+		fprintf(fp, "\n");
 
 		pthread_mutex_unlock(&mutexUAV);
 	} // FIM DA CONDICIONAL IF-ELSE
@@ -306,7 +313,7 @@ void* threadGPS(void* param){
    * aeronave. Irá ocorrer uma interrupção que será tratada pelo SIGUSR1
    */
 
-  dataGPS = (gps_data_t*)malloc(sizeof(gps_data));
+  dataGPS = (gps_data_t*)malloc(sizeof(gps_data_t));
   initGPS(dataGPS);
 
   while (1) {
@@ -323,7 +330,7 @@ void* threadGPS(void* param){
      */
     if ((dataGPS->status == STATUS_FIX) && (dataGPS->fix.mode == MODE_3D)){
       pthread_mutex_unlock(&mutexLock);
-      sigqueue(getpid(),SIGUSR1,NULL);
+      sigqueue(getpid(),SIGUSR1,value);
     }else{
       pthread_mutex_unlock(&mutexLock);
     } // FIM DO IF-ELSE 3D FIX
@@ -367,7 +374,7 @@ int main (){
 // =======================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU
 // =======================================================================
-  for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
+  for (contadorIMU = 0; contadorIMU <= 2; contadorIMU++) {
 		// Aqui cabe uma otimização fazendo initIMU(contadorIMU, imu)
 		// e alterando a implementação do IMU
   	imu[contadorIMU] = initIMU(contadorIMU);
@@ -376,7 +383,7 @@ int main (){
 // =======================================================================
 // INICIALIZAÇÃO DO GPS
 // =======================================================================
-  if(pthread_create(&threadGPS, NULL, &threadGPS, NULL) != 0){
+  if(pthread_create(&pthreadGPS, NULL, &threadGPS, NULL) != 0){
     fprintf(stderr, "Erro na inicialização da thread do GPS na linha # %d\n", __LINE__);
     exit(EXIT_FAILURE);
   }
@@ -386,11 +393,16 @@ int main (){
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
 		// =======================================================================
-		for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
+		for (contadorIMU = 0; contadorIMU <= 2; contadorIMU++) {
 			leituraIMU(imu[contadorIMU], imu_struct);
-      imu_struct ++;
+			imu_struct ++;
+			if(contadorIMU == 2){
+			    uav.roll = imu_struct->roll;
+			    uav.pitch = imu_struct->pitch;
+			    uav.yaw = imu_struct->yaw;
+			  }
 		}
-    imu_struct -= 2;
+		imu_struct -= 2;
 
 		// =======================================================================
 		// thread para processamento dos dados na struct
@@ -405,7 +417,7 @@ int main (){
 		}
 		pthread_join(processamentoDireita, NULL);
 		pthread_join(processamentoEsquerda, NULL);
-    // pthread_create (&threadKalmanFusion, NULL, &kalmanFusion, NULL);
+		// pthread_create (&threadKalmanFusion, NULL, &kalmanFusion, NULL);
 		// pthread_join(threadKalmanFusion, NULL);
 
 		// =======================================================================
@@ -423,6 +435,7 @@ int main (){
 	// Pós-processamento dos dados (FFT) e plot dos gráficos
 	// =======================================================================
 
-  // Ao final de tudo, a própria main executa o SIGINT
-	sigqueue(getpid(),SIGINT,NULL);
+	// Ao final de tudo, a própria main executa o SIGINT
+	sigqueue(getpid(),SIGINT,value);
+	return 0;
 } // FIM DA FUNÇÃO MAIN
