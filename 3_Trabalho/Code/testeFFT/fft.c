@@ -11,22 +11,22 @@ static size_t reverse_bits(size_t x, int n);
 static void *memdup(const void *src, size_t n);
 
 
-bool Fft_transform(double real[], double imag[], size_t n) {
+bool FFT_transform(double real[], double imag[], size_t n) {
 	if (n == 0)
 		return true;
 	else if ((n & (n - 1)) == 0)  // Is power of 2
-		return Fft_transformRadix2(real, imag, n);
+		return FFT_transformRadix2(real, imag, n);
 	else  // More complicated algorithm for arbitrary sizes
-		return Fft_transformBluestein(real, imag, n);
+		return FFT_transformBluestein(real, imag, n);
 }
 
 
-bool Fft_inverseTransform(double real[], double imag[], size_t n) {
-	return Fft_transform(imag, real, n);
+bool FFT_inverseTransform(double real[], double imag[], size_t n) {
+	return FFT_transform(imag, real, n);
 }
 
 
-bool Fft_transformRadix2(double real[], double imag[], size_t n) {
+bool FFT_transformRadix2(double real[], double imag[], size_t n) {
 	// Length variables
 	bool status = false;
 	int levels = 0;  // Compute levels = floor(log2(n))
@@ -88,7 +88,7 @@ cleanup:
 }
 
 
-bool Fft_transformBluestein(double real[], double imag[], size_t n) {
+bool FFT_transformBluestein(double real[], double imag[], size_t n) {
 	bool status = false;
 	
 	// Find a power-of-2 convolution length m such that m >= n * 2 + 1
@@ -141,7 +141,7 @@ bool Fft_transformBluestein(double real[], double imag[], size_t n) {
 	}
 	
 	// Convolution
-	if (!Fft_convolveComplex(areal, aimag, breal, bimag, creal, cimag, m))
+	if (!FFT_convolveComplex(areal, aimag, breal, bimag, creal, cimag, m))
 		goto cleanup;
 	
 	// Postprocessing
@@ -165,7 +165,7 @@ cleanup:
 }
 
 
-bool Fft_convolveReal(const double x[], const double y[], double out[], size_t n) {
+bool FFT_convolveReal(const double x[], const double y[], double out[], size_t n) {
 	bool status = false;
 	double *ximag = calloc(n, sizeof(double));
 	double *yimag = calloc(n, sizeof(double));
@@ -173,7 +173,7 @@ bool Fft_convolveReal(const double x[], const double y[], double out[], size_t n
 	if (ximag == NULL || yimag == NULL || zimag == NULL)
 		goto cleanup;
 	
-	status = Fft_convolveComplex(x, ximag, y, yimag, out, zimag, n);
+	status = FFT_convolveComplex(x, ximag, y, yimag, out, zimag, n);
 cleanup:
 	free(zimag);
 	free(yimag);
@@ -182,7 +182,7 @@ cleanup:
 }
 
 
-bool Fft_convolveComplex(
+bool FFT_convolveComplex(
 		const double xreal[], const double ximag[],
 		const double yreal[], const double yimag[],
 		double outreal[], double outimag[], size_t n) {
@@ -199,9 +199,9 @@ bool Fft_convolveComplex(
 	if (xr == NULL || xi == NULL || yr == NULL || yi == NULL)
 		goto cleanup;
 	
-	if (!Fft_transform(xr, xi, n))
+	if (!FFT_transform(xr, xi, n))
 		goto cleanup;
-	if (!Fft_transform(yr, yi, n))
+	if (!FFT_transform(yr, yi, n))
 		goto cleanup;
 	
 	for (size_t i = 0; i < n; i++) {
@@ -209,7 +209,7 @@ bool Fft_convolveComplex(
 		xi[i] = xi[i] * yr[i] + xr[i] * yi[i];
 		xr[i] = temp;
 	}
-	if (!Fft_inverseTransform(xr, xi, n))
+	if (!FFT_inverseTransform(xr, xi, n))
 		goto cleanup;
 	
 	for (size_t i = 0; i < n; i++) {  // Scaling (because this FFT implementation omits it)

@@ -4,18 +4,16 @@
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.8
+ * Versão: rev 3.9
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
  * Código open-source
  * =====================================================================
  * Falta:
- * - Testar com todos os componentes
  * - Implementar FFT:
- *    - Precisa do timestamp (GPS) e do usecs since last epoch (IMU);
+ *    - Precisa do timestamp (GPS) e do usecs since last epoch (IMU)?;
  * - Alterar fileHandler:
- *    - Separar cada dado a ser FFTado e plotado em um arquivo separado?
  *       - Tamanho do arquivo é o tamanho do vetor => EOF = fim do vetor
  *       - while(feof(file_pointer)){ length++ } malloc(sizeof()*length)
  *    - Inicializar a tabela na main para a thread apenas add os dados
@@ -130,6 +128,7 @@
     float velSubida; // metros/segundo
     float velTerrest; // metros/segundo
     float timestamp; // segundos
+    int fixmode; // auto-explicativo
   }aeronave;
 
 // =====================================================================
@@ -140,7 +139,6 @@
   volatile aeronave uav;
   // struct para uso do sinal de interrupção
   struct sigaction act;
-  struct sigaction salva;
   union sigval value;
   // Variável global para uso do GPSD
   gps_data_t* dataGPS;
@@ -181,22 +179,6 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
     sleep(1);
     exit(EXIT_SUCCESS);
 } // FIM DA SUBROTINA trataSinal
-
-// =====================================================================
-// Sub-rotina para tratamento do sinal do GPS
-// =====================================================================
-void salvaGPS(int signum, siginfo_t* info, void* ptr){
-  // Salva os dados do dataGPS->fix.etc no uav para fusão
-  pthread_mutex_lock(&mutexUAV);
-  uav.latitude = dataGPS->fix.latitude;
-  uav.longitude = dataGPS->fix.longitude;
-  uav.altitude = dataGPS->fix.altitude;
-  uav.velTerrest = dataGPS->fix.speed;
-  uav.velSubida = dataGPS->fix.climb;
-  uav.timestamp = dataGPS->fix.time;
-  pthread_mutex_unlock(&mutexUAV);
-  pthread_mutex_unlock(&mutexGPS);
-} // FIM DA SUBROTINA salvaGPS
 
 // =====================================================================
 // thread para processamento dos dados na struct
@@ -268,7 +250,8 @@ void fileHandler(){
         */
 
 	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
-	char buffer[100];
+	char buffer[100]; // Nome do arquivo
+	char scr[128]; // Para printar timestamp do GPS
 	snprintf(buffer, sizeof(char)*100, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s.txt", __TIME__);
 	FILE *fp = fopen(buffer, "a+");
 
@@ -288,7 +271,9 @@ void fileHandler(){
     fprintf(stderr, "Altitude: %f m\n", uav.altitude);
     fprintf(stderr, "Velocidade Horizontal: %f m/s\n", uav.velTerrest);
     fprintf(stderr, "Velocidade de Subida: %f m/s\n", uav.velSubida);
-    fprintf(stderr, "Marca-passo: %f segundos\n\n", uav.timestamp);
+    unix_to_iso8601(uav.timestamp, scr, sizeof(scr));
+    fprintf(stderr, "Tempo: %s\n\n", scr);
+    fprintf(stderr, "FIX MODE: %d\n\n", uav.fixmode);
     fprintf(stderr, "Roll: %f deg\n", uav.roll);
     fprintf(stderr, "Pitch: %f deg\n", uav.pitch);
     fprintf(stderr, "Yaw: %f deg\n\n", uav.yaw);
@@ -323,16 +308,18 @@ void* threadGPS(void* param){
     usleep(750000); // A cada 3/4 de segundo (1.33 Hz), verifica GPS
     pthread_mutex_lock(&mutexGPS);
     leituraGPS(dataGPS);
-    /* Se foi recebido um 3D FIX, envia SIGUSR1 para a thread principal.
-     * Como todas as threads possuem o mesmo pid (retornado por getpid)
-     * Podemos utilizar a chamada getpid() que qualquer thread que receber
-     * o sinal poderá tratá-lo.
-     *
-     * Caso isso não funcione, utilizar gettid()
-     * na mainThread e passar isto como (void*)param para esta thread!
-     */
     if ((dataGPS->status == STATUS_FIX) && (dataGPS->fix.mode == MODE_3D)){
-      sigqueue(getpid(),SIGUSR1,value);
+        // Salva os dados do dataGPS->fix.etc no uav para fusão
+	pthread_mutex_lock(&mutexUAV);
+	uav.latitude = dataGPS->fix.latitude;
+	uav.longitude = dataGPS->fix.longitude;
+	uav.altitude = dataGPS->fix.altitude;
+	uav.velTerrest = dataGPS->fix.speed;
+	uav.velSubida = dataGPS->fix.climb;
+	uav.timestamp = dataGPS->fix.time;
+	uav.fixmode = dataGPS->fix.mode;
+	pthread_mutex_unlock(&mutexUAV);
+	pthread_mutex_unlock(&mutexGPS);
     }else{
       pthread_mutex_unlock(&mutexGPS);
     } // FIM DO IF-ELSE 3D FIX
@@ -358,12 +345,9 @@ int main (){
   // set das flags para o sinal de interrupção SIGINT = ctrl + c
   act.sa_sigaction = trataSinal;
   act.sa_flags = SA_SIGINFO; // info sobre o sinal
-  salva.sa_sigaction = salvaGPS;
-  salva.sa_flags = SA_SIGINFO;
 
   // Direcionamento para o devido tratamento dos sinais
   sigaction(SIGINT, &act, NULL);
-  sigaction(SIGUSR1, &salva, NULL);
 
 	// Setup da lib wiringPi para uso do GPIO
   wiringPiSetup();

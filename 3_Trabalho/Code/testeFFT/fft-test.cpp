@@ -70,13 +70,13 @@ static void test_fft(int n) {
 	double *inputreal = random_reals(n);
 	double *inputimag = random_reals(n);
 	
-	double *refoutreal = malloc(n * sizeof(double));
-	double *refoutimag = malloc(n * sizeof(double));
+	double *refoutreal = (double*)malloc(n * sizeof(double));
+	double *refoutimag = (double*)malloc(n * sizeof(double));
 	naive_dft(inputreal, inputimag, refoutreal, refoutimag, false, n);
 	
-	double *actualoutreal = memdup(inputreal, n * sizeof(double));
-	double *actualoutimag = memdup(inputimag, n * sizeof(double));
-	Fft_transform(actualoutreal, actualoutimag, n);
+	double *actualoutreal = (double*)memdup(inputreal, n * sizeof(double));
+	double *actualoutimag = (double*)memdup(inputimag, n * sizeof(double));
+	FFT_transform(actualoutreal, actualoutimag, n);
 	
 	printf("fftsize=%4d  logerr=%5.1f\n", n,
 		log10_rms_err(refoutreal, refoutimag, actualoutreal, actualoutimag, n));
@@ -96,13 +96,13 @@ static void test_convolution(int n) {
 	double *input1real = random_reals(n);
 	double *input1imag = random_reals(n);
 	
-	double *refoutreal = malloc(n * sizeof(double));
-	double *refoutimag = malloc(n * sizeof(double));
+	double *refoutreal = (double*)malloc(n * sizeof(double));
+	double *refoutimag = (double*)malloc(n * sizeof(double));
 	naive_convolve(input0real, input0imag, input1real, input1imag, refoutreal, refoutimag, n);
 	
-	double *actualoutreal = malloc(n * sizeof(double));
-	double *actualoutimag = malloc(n * sizeof(double));
-	Fft_convolveComplex(input0real, input0imag, input1real, input1imag, actualoutreal, actualoutimag, n);
+	double *actualoutreal = (double*)malloc(n * sizeof(double));
+	double *actualoutimag = (double*)malloc(n * sizeof(double));
+	FFT_convolveComplex(input0real, input0imag, input1real, input1imag, actualoutreal, actualoutimag, n);
 	
 	printf("convsize=%4d  logerr=%5.1f\n", n,
 		log10_rms_err(refoutreal, refoutimag, actualoutreal, actualoutimag, n));
@@ -178,7 +178,7 @@ static double log10_rms_err(const double *xreal, const double *ximag,
 
 
 static double *random_reals(int n) {
-	double *result = malloc(n * sizeof(double));
+	double *result = (double*)malloc(n * sizeof(double));
 	for (int i = 0; i < n; i++)
 		result[i] = (rand() / (RAND_MAX + 1.0)) * 2 - 1;
 	return result;
