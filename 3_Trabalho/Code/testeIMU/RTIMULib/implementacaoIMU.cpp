@@ -63,24 +63,24 @@ RTIMU* initIMU(int i){
           buzzerTone('D', 100);
           buzzerTone('X', 100);
           break;
-        // case 2:
-        //   settings = new RTIMUSettings("/home/pi/Embarcados/3_Trabalho/Code/testeIMU/initFiles/MPU9250_2", "RTIMULib");
-        //
-        //   imu = RTIMU::createIMU(settings);
-        //
-        //   if((imu == NULL)||(imu->IMUType() == RTIMU_TYPE_NULL)){
-        //     printf("Unidade IMU [%d] não identificado na porta SPI.\n", i);
-        //     exit(1);
-        //   }
-        //
-        //   imu->IMUInit();
-        //   imu->setSlerpPower(0.02);
-        //   imu->setGyroEnable(true);
-        //   imu->setAccelEnable(true);
-        //   imu->setCompassEnable(true);
-        //   buzzerTone('A', 100);
-        //   buzzerTone('X', 100);
-        //   break;
+        case 2:
+          settings = new RTIMUSettings("/home/pi/Embarcados/3_Trabalho/Code/testeIMU/initFiles/MPU9250_2", "RTIMULib");
+
+          imu = RTIMU::createIMU(settings);
+
+          if((imu == NULL)||(imu->IMUType() == RTIMU_TYPE_NULL)){
+            printf("Unidade IMU [%d] não identificado na porta SPI.\n", i);
+            exit(1);
+          }
+
+          imu->IMUInit();
+          imu->setSlerpPower(0.02);
+          imu->setGyroEnable(true);
+          imu->setAccelEnable(true);
+          imu->setCompassEnable(true);
+          buzzerTone('A', 100);
+          buzzerTone('X', 100);
+          break;
         default:
             printf("Nenhuma unidade IMU identificada!\n");
             exit(1);

@@ -159,8 +159,6 @@ void trataSinal(int signum, siginfo_t* info, void* ptr){
     system("clear");
     fprintf(stderr, "Recebido o sinal de interrupção [%d].\n", signum);
     printf("\n%s\n", "Teste realizado com sucesso!");
-    // Encerramento do fileHandler
-    pthread_cancel(threadFileHandler);
     // Encerramento dos processamentos
     pthread_cancel(processamentoDireita);
     pthread_cancel(processamentoEsquerda);
@@ -222,7 +220,8 @@ void* procDadosDir(void* unused){
   uav.anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
   pthread_mutex_unlock(&mutexUAV);
 
-  imu_struct-=2;
+  imu_struct--;
+  imu_struct--;
 
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
@@ -246,7 +245,8 @@ void* procDadosEsq(void* unused){
   uav.anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
   pthread_mutex_unlock(&mutexUAV);
 
-  imu_struct-=2;
+  imu_struct--;
+  imu_struct--;
 
   return NULL;
 } // FIM DA THREAD procDadosEsq
@@ -269,12 +269,12 @@ void fileHandler(){
 
 	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
 	char buffer[100];
-	snprintf(buffer, sizeof(char)*100, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s_%s.txt", __DATE__, __TIME__);
+	snprintf(buffer, sizeof(char)*100, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s.txt", __TIME__);
 	FILE *fp = fopen(buffer, "a+");
 
 	if (fp == NULL){
 		// Se não for possível abrir o arquivo, EXIT_FAILURE
-		fprintf(stderr, "Não foi possível realizar a abertura do arquivo [dados_%s_%s.txt] na linha # %d.\n", __DATE__,__TIME__,__LINE__);
+		fprintf(stderr, "Não foi possível realizar a abertura do arquivo [dados_%s.txt] na linha # %d.\n", __TIME__,__LINE__);
 		exit(EXIT_FAILURE);
 	}else{
 		// Caso tenha sido possível realizar a abertura do arquivo, locka a chave
@@ -345,7 +345,7 @@ void* threadGPS(void* param){
 // =====================================================================
 int main (){
   // Ponteiro para classe imu
-	RTIMU *imu[2];
+	RTIMU *imu[3];
 
 	// Variável para contar o IMU a ser lido/processado para manter a ordem
 	int contadorIMU = 0;
@@ -379,11 +379,15 @@ int main (){
 // =====================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU
 // =====================================================================
-  for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
+  while (contadorIMU < 3) {
 		// Aqui cabe uma otimização fazendo initIMU(contadorIMU, imu)
 		// e alterando a implementação do IMU
   	imu[contadorIMU] = initIMU(contadorIMU);
+	contadorIMU++;
   }
+  
+  // Zera o contador
+  contadorIMU = 0;
 
 // =====================================================================
 // INICIALIZAÇÃO DO GPS
@@ -398,18 +402,22 @@ int main (){
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
 		// =======================================================================
-		for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
+		contadorIMU = 0;
+		while (contadorIMU < 3) {
 			leituraIMU(imu[contadorIMU], imu_struct);
-			imu_struct ++;
 			if(contadorIMU == 2){
-        pthread_mutex_lock(&mutexUAV);
+			  pthread_mutex_lock(&mutexUAV);
 			  uav.roll = imu_struct->roll;
 			  uav.pitch = imu_struct->pitch;
 			  uav.yaw = imu_struct->yaw;
-        pthread_mutex_unlock(&mutexUAV);
+			  pthread_mutex_unlock(&mutexUAV);
 			}
+			contadorIMU++;
+			imu_struct ++;
 		}
-		imu_struct -= 2;
+		imu_struct--;
+		imu_struct--;
+		imu_struct--;
 
 		// =======================================================================
 		// thread para processamento dos dados na struct

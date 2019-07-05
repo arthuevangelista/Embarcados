@@ -41,29 +41,30 @@ volatile torsion anguloDeTorcao;
 
 void* procDadosDir(void* unused){
   imuDataAngulo* imu_struct;
-  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*2);
-  //imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
   imu_struct = (imuDataAngulo *) unused;
 
   double pitch0 = imu_struct->pitch;
   double roll0 = imu_struct->roll;
 
   imu_struct++;
-  //imu_struct++;
+  imu_struct++;
 
   double pitch2 = imu_struct->pitch;
   double roll2 = imu_struct->roll;
 
   anguloDeFlexao.meiaAsaDireita = copysign((pitch0 - std::abs(pitch2)), pitch0);
   anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
+  
+  imu_struct--;
+  imu_struct--;
 
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
 
 void* procDadosEsq(void* unused){
   imuDataAngulo* imu_struct;
-  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*2);
-  //imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
   imu_struct = (imuDataAngulo *) unused;
 
   imu_struct++;
@@ -71,20 +72,21 @@ void* procDadosEsq(void* unused){
   double pitch1 = imu_struct->pitch;
   double roll1 = imu_struct->roll;
 
-  imu_struct--;
-  //imu_struct++;
+  imu_struct++;
   double pitch2 = imu_struct->pitch;
   double roll2 = imu_struct->roll;
 
   anguloDeFlexao.meiaAsaEsquerda = copysign((pitch1 - std::abs(pitch2)), pitch1);
   anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
 
+  imu_struct--;
+  imu_struct--;
+  
   return NULL;
 } // FIM DA THREAD procDadosEsq
 
 int main(){
-  RTIMU *imu[1];
-  // RTIMU *imu[2];
+  RTIMU *imu[3];
 
   int contadorIMU = 0;
 
@@ -92,28 +94,29 @@ int main(){
 	pthread_t processamentoEsquerda;
 
   imuDataAngulo* imu_struct;
-  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*2);
-  //imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
+  imu_struct = (imuDataAngulo*)malloc(sizeof(imuDataAngulo)*3);
 
   wiringPiSetup();
   buzzerInit();
 
   pinMode(CONTROL_BUTTON_PIN, INPUT);
 
-  for (contadorIMU = 0; contadorIMU < 2; contadorIMU++) {
-    //for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
-    imu[contadorIMU] = initIMU(contadorIMU);
+  while (contadorIMU < 3) {
+  	imu[contadorIMU] = initIMU(contadorIMU);
+	contadorIMU++;
   }
 
   while (1){
   //while (digitalRead(CONTROL_BUTTON_PIN)){
-    for (contadorIMU = 0; contadorIMU < 2; contadorIMU++) {
-      // for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
+    contadorIMU = 0;
+    while (contadorIMU < 3) {
       leituraIMU(imu[contadorIMU], imu_struct);
-      imu_struct ++;
+      contadorIMU++;
+      imu_struct++;
     }
-
-    imu_struct -= 2;
+    imu_struct--;
+    imu_struct--;
+    imu_struct--;
 
     if( pthread_create (&processamentoDireita, NULL, &procDadosDir, (void*) imu_struct) != 0){
       fprintf(stderr, "Erro na inicializacao da thread procDadosDir na linha # %d\n", __LINE__);
@@ -127,7 +130,7 @@ int main(){
 
     pthread_join(processamentoDireita, NULL);
     pthread_join(processamentoEsquerda, NULL);
-    
+
     system("clear");
 
     fprintf(stderr, "Torcao meia asa Direita: %f\n", anguloDeTorcao.meiaAsaDireita);
