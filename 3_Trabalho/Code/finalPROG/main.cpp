@@ -229,7 +229,6 @@ void* procDadosDir(void* unused){
   uav.anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
   pthread_mutex_unlock(&mutexUAV);
 
-  free(imu_struct);
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
 
@@ -252,7 +251,6 @@ void* procDadosEsq(void* unused){
   uav.anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
   pthread_mutex_unlock(&mutexUAV);
 
-  free(imu_struct);
   return NULL;
 } // FIM DA THREAD procDadosEsq
 
