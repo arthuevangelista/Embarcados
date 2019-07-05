@@ -27,8 +27,8 @@ GPSPATH = libs/GPSLib
 BUZZERPATH = libs/BUZZERLib
 
 # Definicoes do compilador e etc
-CC    = gcc
-CXX   = g++
+CC    = gcc -g
+CXX   = g++ -g
 DEFINES      = -lpthread -lwiringPi -lm -lgps
 CFLAGS			= -pipe -O2 -Wall -W $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W $(DEFINES)
@@ -52,6 +52,7 @@ MKDIR			= mkdir -p
 
 # Diretorio para output
 OBJECTS_DIR   = objects/
+RESULT_DIR =   /home/pi/Resultados/
 
 # Arquivos
 DEPS    = $(IMUPATH)/RTMath.h \
@@ -123,6 +124,7 @@ TARGET		= Output/$(MAKE_TARGET)
 # Regras
 $(TARGET): $(OBJECTS)
 	@$(CHK_DIR_EXISTS) Output/ || $(MKDIR) Output/
+	@$(CHK_DIR_EXISTS) $(RESULT_DIR) || $(MKDIR) $(RESULT_DIR)
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
 clean:

@@ -42,7 +42,7 @@ RTIMU* initIMU(int i){
           imu->setGyroEnable(true);
           imu->setAccelEnable(true);
           imu->setCompassEnable(false);
-          buzzerTone('C', 100);
+          buzzerTone('C', 300);
           buzzerTone('X', 100);
           break;
         case 1:
@@ -60,7 +60,7 @@ RTIMU* initIMU(int i){
           imu->setGyroEnable(true);
           imu->setAccelEnable(true);
           imu->setCompassEnable(false);
-          buzzerTone('D', 100);
+          buzzerTone('D', 300);
           buzzerTone('X', 100);
           break;
         case 2:
@@ -78,7 +78,7 @@ RTIMU* initIMU(int i){
           imu->setGyroEnable(true);
           imu->setAccelEnable(true);
           imu->setCompassEnable(true);
-          buzzerTone('A', 100);
+          buzzerTone('A', 600);
           buzzerTone('X', 100);
           break;
         default:

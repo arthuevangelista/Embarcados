@@ -140,72 +140,65 @@
   volatile aeronave uav;
   // struct para uso do sinal de interrupção
   struct sigaction act;
+  struct sigaction salva;
   union sigval value;
   // Variável global para uso do GPSD
   gps_data_t* dataGPS;
   // Chaves mutex para armazenamento dos dados
-  static pthread_mutex_t mutexLock;
+  static pthread_mutex_t mutexGPS;
   static pthread_mutex_t mutexUAV;
   // Declaração das threads a serem usadas
   pthread_t pthreadGPS;
   pthread_t processamentoDireita;
   pthread_t processamentoEsquerda;
-  pthread_t threadFileHandler;
 
 // =====================================================================
 // Sub-rotina para tratamento do sinal de interrupção
 // =====================================================================
 void trataSinal(int signum, siginfo_t* info, void* ptr){
-  switch (signum) {
-    case SIGINT:
-      system("clear");
-      fprintf(stderr, "Recebido o sinal de interrupção [%d].\n", signum);
-      printf("\n%s\n", "Teste realizado com sucesso!");
-
-      // Encerramento do fileHandler
-      pthread_cancel(threadFileHandler);
-
-      // Encerramento dos processamentos
-      pthread_cancel(processamentoDireita);
-      pthread_cancel(processamentoEsquerda);
-
-      // Encerramento do GPS
-      pthread_cancel(pthreadGPS);
-      killGPS(dataGPS);
-      free(dataGPS);
-
-      // Destruindo chave mutex
-      pthread_mutex_destroy(&mutexLock);
-      pthread_mutex_destroy(&mutexUAV);
-      // Toque do buzzer
-      buzzerTone('B',100);
-      buzzerTone('A',100);
-      buzzerTone('G',100);
-      buzzerTone('F',100);
-      buzzerTone('E',100);
-      buzzerTone('D',100);
-      buzzerTone('C',200);
-      buzzerTone('X',100);
-      sleep(1);
-      exit(EXIT_SUCCESS);
-      break;
-    case SIGUSR1:
-      // Salva os dados do dataGPS->fix.etc no uav para fusão
-      pthread_mutex_lock(&mutexLock);
-      pthread_mutex_lock(&mutexUAV);
-      uav.latitude = dataGPS->fix.latitude;
-      uav.longitude = dataGPS->fix.longitude;
-      uav.altitude = dataGPS->fix.altitude;
-      uav.velTerrest = dataGPS->fix.speed;
-      uav.velSubida = dataGPS->fix.climb;
-      uav.timestamp = dataGPS->fix.time;
-      pthread_mutex_unlock(&mutexLock);
-      pthread_mutex_unlock(&mutexUAV);
-      break;
-    default:
-    break;
-  } // FIM DO SWITCH-CASE
+    system("clear");
+    fprintf(stderr, "Recebido o sinal de interrupção [%d].\n", signum);
+    printf("\n%s\n", "Teste realizado com sucesso!");
+    // Encerramento do fileHandler
+    pthread_cancel(threadFileHandler);
+    // Encerramento dos processamentos
+    pthread_cancel(processamentoDireita);
+    pthread_cancel(processamentoEsquerda);
+    // Encerramento do GPS
+    pthread_cancel(pthreadGPS);
+    killGPS(dataGPS);
+    free(dataGPS);
+    // Destruindo chave mutex
+    pthread_mutex_destroy(&mutexGPS);
+    pthread_mutex_destroy(&mutexUAV);
+    // Toque do buzzer
+    buzzerTone('B',100);
+    buzzerTone('A',100);
+    buzzerTone('G',100);
+    buzzerTone('F',100);
+    buzzerTone('E',100);
+    buzzerTone('D',100);
+    buzzerTone('C',200);
+    buzzerTone('X',100);
+    sleep(1);
+    exit(EXIT_SUCCESS);
 } // FIM DA SUBROTINA trataSinal
+
+// =====================================================================
+// Sub-rotina para tratamento do sinal do GPS
+// =====================================================================
+void salvaGPS(int signum, siginfo_t* info, void* ptr){
+  // Salva os dados do dataGPS->fix.etc no uav para fusão
+  pthread_mutex_lock(&mutexUAV);
+  uav.latitude = dataGPS->fix.latitude;
+  uav.longitude = dataGPS->fix.longitude;
+  uav.altitude = dataGPS->fix.altitude;
+  uav.velTerrest = dataGPS->fix.speed;
+  uav.velSubida = dataGPS->fix.climb;
+  uav.timestamp = dataGPS->fix.time;
+  pthread_mutex_unlock(&mutexUAV);
+  pthread_mutex_unlock(&mutexGPS);
+} // FIM DA SUBROTINA salvaGPS
 
 // =====================================================================
 // thread para processamento dos dados na struct
@@ -229,6 +222,8 @@ void* procDadosDir(void* unused){
   uav.anguloDeTorcao.meiaAsaDireita = copysign((roll0 - std::abs(roll2)), roll0);
   pthread_mutex_unlock(&mutexUAV);
 
+  imu_struct-=2;
+
   return NULL;
 } // FIM DA THREAD procDadosEsqDir
 
@@ -251,13 +246,15 @@ void* procDadosEsq(void* unused){
   uav.anguloDeTorcao.meiaAsaEsquerda = copysign((roll1 - std::abs(roll2)), roll1);
   pthread_mutex_unlock(&mutexUAV);
 
+  imu_struct-=2;
+
   return NULL;
 } // FIM DA THREAD procDadosEsq
 
 // =====================================================================
 // thread para armazenamento dos dados
 // =====================================================================
-void* fileHandler(void* dados){
+void fileHandler(){
 	/* Sub-rotina dedicada a apenas armazenar o valor enviado para thread
 	* em um arquivo. A chave MUTEX será utilizada para que:
 	*
@@ -271,14 +268,13 @@ void* fileHandler(void* dados){
         */
 
 	// Pra salvar o arquivo com um nome customizado toda vez que houver aquisição
-	char buffer[50];
-	snprintf(buffer, sizeof(char)*50, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s_%s.txt", __DATE__, __TIME__);
-
-	FILE *fp = fopen(buffer, "a");
+	char buffer[100];
+	snprintf(buffer, sizeof(char)*100, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s_%s.txt", __DATE__, __TIME__);
+	FILE *fp = fopen(buffer, "a+");
 
 	if (fp == NULL){
 		// Se não for possível abrir o arquivo, EXIT_FAILURE
-		fprintf(stderr, "Não foi possível realizar a abertura do arquivo %s na linha # %d\n", __FILE__,__LINE__);
+		fprintf(stderr, "Não foi possível realizar a abertura do arquivo [dados_%s_%s.txt] na linha # %d.\n", __DATE__,__TIME__,__LINE__);
 		exit(EXIT_FAILURE);
 	}else{
 		// Caso tenha sido possível realizar a abertura do arquivo, locka a chave
@@ -302,15 +298,14 @@ void* fileHandler(void* dados){
     fprintf(stderr, "Flexao meia asa Esquerda: %f\n", uav.anguloDeFlexao.meiaAsaEsquerda);
 
 		fprintf(fp, "%f\t\t%f\t\t%f\t\t%f", uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
-		fprintf(fp, "\t\t%f\t\t%f\t\t%f\n", uav.roll, uav.pitch, uav.yaw);
+		fprintf(fp, "\t\t%f\t\t%f\t\t%f", uav.roll, uav.pitch, uav.yaw);
 		/* fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
 		fprintf(fp, "\n");
 
 		pthread_mutex_unlock(&mutexUAV);
 	} // FIM DA CONDICIONAL IF-ELSE
 	fclose(fp);
-	return NULL;
-} // FIM DA THREAD fileHandler
+} // FIM DA FUNÇÃO fileHandler
 
 // =====================================================================
 // Função de inicialização do GPS
@@ -325,8 +320,8 @@ void* threadGPS(void* param){
   initGPS(dataGPS);
 
   while (1) {
-    usleep(500000); // A cada 1/2 de segundo (2 Hz), verifica GPS
-    pthread_mutex_lock(&mutexLock);
+    usleep(750000); // A cada 3/4 de segundo (1.33 Hz), verifica GPS
+    pthread_mutex_lock(&mutexGPS);
     leituraGPS(dataGPS);
     /* Se foi recebido um 3D FIX, envia SIGUSR1 para a thread principal.
      * Como todas as threads possuem o mesmo pid (retornado por getpid)
@@ -337,10 +332,9 @@ void* threadGPS(void* param){
      * na mainThread e passar isto como (void*)param para esta thread!
      */
     if ((dataGPS->status == STATUS_FIX) && (dataGPS->fix.mode == MODE_3D)){
-      pthread_mutex_unlock(&mutexLock);
       sigqueue(getpid(),SIGUSR1,value);
     }else{
-      pthread_mutex_unlock(&mutexLock);
+      pthread_mutex_unlock(&mutexGPS);
     } // FIM DO IF-ELSE 3D FIX
   } // FIM DO LOOP-INFINITO DA THREAD DO GPS
 
@@ -364,9 +358,12 @@ int main (){
   // set das flags para o sinal de interrupção SIGINT = ctrl + c
   act.sa_sigaction = trataSinal;
   act.sa_flags = SA_SIGINFO; // info sobre o sinal
+  salva.sa_sigaction = salvaGPS;
+  salva.sa_flags = SA_SIGINFO;
 
   // Direcionamento para o devido tratamento dos sinais
-  sigaction(SIGINT | SIGUSR1, &act, NULL);
+  sigaction(SIGINT, &act, NULL);
+  sigaction(SIGUSR1, &salva, NULL);
 
 	// Setup da lib wiringPi para uso do GPIO
   wiringPiSetup();
@@ -382,7 +379,7 @@ int main (){
 // =====================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU
 // =====================================================================
-  for (contadorIMU = 0; contadorIMU <= 2; contadorIMU++) {
+  for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
 		// Aqui cabe uma otimização fazendo initIMU(contadorIMU, imu)
 		// e alterando a implementação do IMU
   	imu[contadorIMU] = initIMU(contadorIMU);
@@ -401,14 +398,16 @@ int main (){
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
 		// =======================================================================
-		for (contadorIMU = 0; contadorIMU <= 2; contadorIMU++) {
+		for (contadorIMU = 0; contadorIMU < 3; contadorIMU++) {
 			leituraIMU(imu[contadorIMU], imu_struct);
 			imu_struct ++;
 			if(contadorIMU == 2){
-			    uav.roll = imu_struct->roll;
-			    uav.pitch = imu_struct->pitch;
-			    uav.yaw = imu_struct->yaw;
-			  }
+        pthread_mutex_lock(&mutexUAV);
+			  uav.roll = imu_struct->roll;
+			  uav.pitch = imu_struct->pitch;
+			  uav.yaw = imu_struct->yaw;
+        pthread_mutex_unlock(&mutexUAV);
+			}
 		}
 		imu_struct -= 2;
 
@@ -428,15 +427,8 @@ int main (){
 		// pthread_create (&threadKalmanFusion, NULL, &kalmanFusion, NULL);
 		// pthread_join(threadKalmanFusion, NULL);
 
-		// =======================================================================
-		// thread para processamento dos dados na struct
-		// =======================================================================
-		if( pthread_create(&threadFileHandler, NULL, &fileHandler, NULL) != 0){
-			fprintf(stderr, "Erro na inicialização da thread fileHandler na linha # %d\n", __LINE__);
-			exit(EXIT_FAILURE);
-		}
-		pthread_join(threadFileHandler, NULL);
-
+		// Chama função para guardar e printar os dados
+    fileHandler();
 	} // FIM DO LOOP INFINITO
 
 	// =======================================================================
