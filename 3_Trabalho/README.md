@@ -7,6 +7,3 @@ https://v2.overleaf.com/project/5ac3da5c0334212060040197
 
 Nome: Arthur Evangelista dos Santos   
 Matrícula: 14/0016686
-
-Nome: Fábio Barbosa Pinto   
-Matrícula: 11/0116356   
