@@ -91,7 +91,7 @@
 // =====================================================================
 
 // Pinos utilizados
-#define CONTROL_BUTTON_PIN 20
+#define CONTROL_BUTTON_PIN 11
 #define ADDR_PIN 18
 
 #ifndef BUZZER_PIN
@@ -380,9 +380,23 @@ int main (){
     fprintf(stderr, "Erro na inicialização da thread do GPS na linha # %d\n", __LINE__);
     exit(EXIT_FAILURE);
   }
+// =====================================================================
+// INICILIZAÇÃO DO ARQUIVO
+// =====================================================================
+  char buffer[100]; // Nome do arquivo
+  snprintf(buffer, sizeof(char)*100, "/home/pi/Embarcados/3_Trabalho/Code/Resultados/dados_%s.txt", __TIME__);
+  FILE *fp = fopen(buffer, "w");
+  if (fp == NULL){
+    fprintf(stderr, "Não foi possível realizar a abertura do arquivo [dados_%s.txt] na linha # %d.\n", __TIME__,__LINE__);
+    exit(EXIT_FAILURE);
+  }else{
+    fprintf(fp,"Flexao Direita\t\tFlexao Esquerda\t\t");
+    fprintf(fp,"Torcao Direita\t\tTorcao Esquerda\t\t");
+    fprintf(fp,"Roll\t\t\tPitch\t\t\tYaw\n");
+  }
 
 	// Loop infinito
-	while(/*digitalRead(CONTROL_BUTTON_PIN)*/1){
+	while(digitalRead(CONTROL_BUTTON_PIN)/*1*/){
 		// =======================================================================
 		// Laço de repetição para leitura dos sensores
 		// =======================================================================
