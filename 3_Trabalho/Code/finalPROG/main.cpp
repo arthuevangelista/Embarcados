@@ -236,7 +236,7 @@ void* procDadosEsq(void* unused){
 // =====================================================================
 // thread para armazenamento dos dados
 // =====================================================================
-void fileHandler(){
+int fileHandler(int i){
 	/* Sub-rotina dedicada a apenas armazenar o valor enviado para thread
 	* em um arquivo. A chave MUTEX será utilizada para que:
 	*
@@ -285,11 +285,12 @@ void fileHandler(){
 		fprintf(fp, "%f\t\t%f\t\t%f\t\t%f", uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
 		fprintf(fp, "\t\t%f\t\t%f\t\t%f", uav.roll, uav.pitch, uav.yaw);
 		/* fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
-		fprintf(fp, "\n");
+		fprintf(fp, "\n"); i++;
 
 		pthread_mutex_unlock(&mutexUAV);
 	} // FIM DA CONDICIONAL IF-ELSE
 	fclose(fp);
+	return i;
 } // FIM DA FUNÇÃO fileHandler
 
 // =====================================================================
@@ -335,7 +336,7 @@ int main (){
 	RTIMU *imu[3];
 
 	// Variável para contar o IMU a ser lido/processado para manter a ordem
-	int contadorIMU = 0;
+	int contadorIMU = 0; int tamanhoFFT;
 
   // imu_struct [0] e imu_struct++ [1] são para MPU-6050
   // imu_struct ++ ++ [2] para MPU-9250
@@ -434,7 +435,7 @@ int main (){
 		// pthread_join(threadKalmanFusion, NULL);
 
 		// Chama função para guardar e printar os dados
-    fileHandler();
+    tamanhoFFT = fileHandler(tamanhoFFT);
 	} // FIM DO LOOP INFINITO
 
 	// =======================================================================
