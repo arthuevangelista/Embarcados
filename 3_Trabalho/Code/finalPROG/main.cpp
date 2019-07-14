@@ -4,7 +4,7 @@
  * Universidade de Brasília
  * campus Gama
  *
- * Versão: rev 3.9
+ * Versão: rev 4.0
  * Autor: Arthur Evangelista
  * Matrícula: 14/0016686
  *
@@ -13,11 +13,6 @@
  * Falta:
  * - Implementar FFT:
  *    - Precisa do timestamp (GPS) e do usecs since last epoch (IMU)?;
- * - Alterar fileHandler:
- *       - Tamanho do arquivo é o tamanho do vetor => EOF = fim do vetor
- *       - while(feof(file_pointer)){ length++ } malloc(sizeof()*length)
- *    - Inicializar a tabela na main para a thread apenas add os dados
- *    - Primeira linha deve conter as definições de cada coluna
  * - Implementar GNU Plot
  *    - Plottar FFT
  *    - Plottar PSD (power spectral density = fft/freq)
