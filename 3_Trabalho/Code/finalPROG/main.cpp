@@ -129,6 +129,12 @@
     float velTerrest; // metros/segundo
     float timestamp; // segundos
     int fixmode; // auto-explicativo
+    // Erro do GPS
+    float epy; // erro de latitude em metros
+    float epx; // erro de longitude em metros
+    float epv; // erro de altitude
+    float eps; // erro de velocidade horizontal
+    float epc; // erro de velocidade de subida
   }aeronave;
 
 // =====================================================================
@@ -284,6 +290,9 @@ int fileHandler(int i){
 
 		fprintf(fp, "%f\t\t%f\t\t%f\t\t%f", uav.anguloDeFlexao.meiaAsaDireita, uav.anguloDeFlexao.meiaAsaEsquerda, uav.anguloDeTorcao.meiaAsaDireita, uav.anguloDeTorcao.meiaAsaEsquerda);
 		fprintf(fp, "\t\t%f\t\t%f\t\t%f", uav.roll, uav.pitch, uav.yaw);
+    fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.latitude, uav.epy, uav.longitude, uav.epx);
+    fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.altitude, uav.epv, uav.velTerrest, uav.eps);
+    fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.velSubida, uav.epc);
 		/* fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
 		fprintf(fp, "\n"); i++;
 
@@ -313,10 +322,15 @@ void* threadGPS(void* param){
         // Salva os dados do dataGPS->fix.etc no uav para fusão
 	pthread_mutex_lock(&mutexUAV);
 	uav.latitude = dataGPS->fix.latitude;
+  uav.epy = dataGPS->fix.epy;
 	uav.longitude = dataGPS->fix.longitude;
+  uav.epx = dataGPS->fix.epx;
 	uav.altitude = dataGPS->fix.altitude;
+  uav.epv = dataGPS->fix.epv;
 	uav.velTerrest = dataGPS->fix.speed;
+  uav.eps = dataGPS->fix.eps;
 	uav.velSubida = dataGPS->fix.climb;
+  uav.epc = dataGPS->fix.epc;
 	uav.timestamp = dataGPS->fix.time;
 	uav.fixmode = dataGPS->fix.mode;
 	pthread_mutex_unlock(&mutexUAV);
@@ -370,7 +384,7 @@ int main (){
   	imu[contadorIMU] = initIMU(contadorIMU);
 	contadorIMU++;
   }
-  
+
   // Zera o contador
   contadorIMU = 0;
 
@@ -391,9 +405,13 @@ int main (){
     fprintf(stderr, "Não foi possível realizar a abertura do arquivo [dados_%s.txt] na linha # %d.\n", __TIME__,__LINE__);
     exit(EXIT_FAILURE);
   }else{
-    fprintf(fp,"Flexao Direita\t\tFlexao Esquerda\t\t");
-    fprintf(fp,"Torcao Direita\t\tTorcao Esquerda\t\t");
-    fprintf(fp,"Roll\t\t\tPitch\t\t\tYaw\n");
+    fprintf(fp,"Flexao_Direita\t\tFlexao_Esquerda\t\t");
+    fprintf(fp,"Torcao_Direita\t\tTorcao_Esquerda\t\t");
+    fprintf(fp,"Roll\t\tPitch\t\tYaw\t\t");
+    fprintf(fp,"Latitude\t\tepy\t\tLongitude\t\tepx\t\t");
+    fprintf(fp,"Altitude\t\tepv\t\tVelocidade_Terreste\t\teps\t\t", uav.altitude, uav.epv, uav.velTerrest, uav.eps);
+    fprintf(fp,"tVelocidade_Subida\t\tepc");
+    fprintf(fp, "\n");
   }
 
 	// Loop infinito
