@@ -292,7 +292,7 @@ int fileHandler(int i){
 		fprintf(fp, "\t\t%f\t\t%f\t\t%f", uav.roll, uav.pitch, uav.yaw);
     fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.latitude, uav.epy, uav.longitude, uav.epx);
     fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.altitude, uav.epv, uav.velTerrest, uav.eps);
-    fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", uav.velSubida, uav.epc);
+    fprintf(fp, "\t\t%f\t\t%f", uav.velSubida, uav.epc);
 		/* fprintf(fp, "\t\t%f\t\t%f\t\t%f\t\t%f", velocidade, posicaoX, posicaoY, posicaoZ); */
 		fprintf(fp, "\n"); i++;
 
@@ -350,7 +350,7 @@ int main (){
 	RTIMU *imu[3];
 
 	// Variável para contar o IMU a ser lido/processado para manter a ordem
-	int contadorIMU = 0; int tamanhoFFT;
+	int contadorIMU = 0; int tamanhoFFT = 0;
 
   // imu_struct [0] e imu_struct++ [1] são para MPU-6050
   // imu_struct ++ ++ [2] para MPU-9250
@@ -372,8 +372,9 @@ int main (){
 
   // Botão de controle do loop infinito
 	pinMode(CONTROL_BUTTON_PIN, INPUT);
-  pinMode(ADDR_PIN, OUTPUT);
-  digitalWrite(ADDR_PIN, HIGH);
+  system("gpio -g mode 24 output");
+  system("gpio -g write 24 1");
+  system("i2cdetect -y 1");
 
 // =====================================================================
 // INICIALIZAÇÃO DOS SENSORES IMU
@@ -407,10 +408,10 @@ int main (){
   }else{
     fprintf(fp,"Flexao_Direita\t\tFlexao_Esquerda\t\t");
     fprintf(fp,"Torcao_Direita\t\tTorcao_Esquerda\t\t");
-    fprintf(fp,"Roll\t\tPitch\t\tYaw\t\t");
-    fprintf(fp,"Latitude\t\tepy\t\tLongitude\t\tepx\t\t");
-    fprintf(fp,"Altitude\t\tepv\t\tVelocidade_Terreste\t\teps\t\t", uav.altitude, uav.epv, uav.velTerrest, uav.eps);
-    fprintf(fp,"tVelocidade_Subida\t\tepc");
+    fprintf(fp,"Roll\t\t\tPitch\t\t\tYaw\t\t\t");
+    fprintf(fp,"Latitude\t\tepy\t\t\tLongitude\t\tepx\t\t\t");
+    fprintf(fp,"Altitude\t\tepv\t\t\tVelocidade_Terreste\t\teps\t\t\t");
+    fprintf(fp,"Velocidade_Subida\tepc");
     fprintf(fp, "\n");
   }
 
